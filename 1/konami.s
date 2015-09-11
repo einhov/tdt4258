@@ -38,16 +38,16 @@ skip:
 	bx lr
 
 konami_code:
-	.byte 0x02
-	.byte 0x02
-	.byte 0x08
-	.byte 0x08
-	.byte 0x01
-	.byte 0x04
-	.byte 0x01
-	.byte 0x04
-	.byte 0x10
-	.byte 0x40
+	.byte CONTROLLER_LEFT_UP
+	.byte CONTROLLER_LEFT_UP
+	.byte CONTROLLER_LEFT_DOWN
+	.byte CONTROLLER_LEFT_DOWN
+	.byte CONTROLLER_LEFT_LEFT
+	.byte CONTROLLER_LEFT_RIGHT
+	.byte CONTROLLER_LEFT_LEFT
+	.byte CONTROLLER_LEFT_RIGHT
+	.byte CONTROLLER_RIGHT_LEFT
+	.byte CONTROLLER_RIGHT_RIGHT
 konami_code_end:
 KONAMI_CODE_LENGTH = konami_code_end - konami_code
 
