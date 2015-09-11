@@ -10,40 +10,31 @@
 	.type  konami, %function
 	.thumb_func
 konami:
-	push {v1, v2}
 	ldr a2, =konami_current
 	ldr a3, [a2]
-	ldr v1, =konami_code
-
-	// Check for zeroed konami_current and populate if needed
-	mov v2, #0
-	cmp v2, a3
-	it eq
-	moveq a2, v1
+	ldr a4, =konami_code
 
 	// Check input and update konami_current
-	ldrb v2, [a3]
-	cmp a1, v2
+	ldrb a4, [a4, a3]
+	cmp a1, a4
 	ite eq
 	addeq a3, #1
-	movne a3, v1
+	movne a3, #0
 
 	// See if the code has been entered completely
-	ldr v2, =konami_code_end
-	cmp v2, a3
-	bhi done
+	mov a4, #KONAMI_CODE_LENGTH
+	cmp a4, a3
+	bhi skip
 
 	// We are done, reset code and do something
-	mov a3, v1
+	mov a3, #0
 	// Do something
 	ldr r1, =GPIO_PA_BASE
-	//mov v2, #0
-	mov v2, #0xff
-	str v2, [r1, #GPIO_DOUT]
+	mov a4, #0xff
+	str a4, [r1, #GPIO_DOUT]
 
-done:
+skip:
 	str a3, [a2]
-	pop {v1, v2}
 	bx lr
 
 konami_code:
@@ -58,6 +49,7 @@ konami_code:
 	.byte 0x10
 	.byte 0x40
 konami_code_end:
+KONAMI_CODE_LENGTH = konami_code_end - konami_code
 
 	.section .bss
 
