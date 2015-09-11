@@ -68,12 +68,12 @@ gpio_handler:
 	ldr a1, [a2, #GPIO_IF]
 	str a1, [a2, #GPIO_IFC]
 	ldr v3, =last_input
-	ldr a3, [a2]
+	ldr a3, [v3]
 	ldr v1, =tick2
 	ldr v1, [v1]
-	add v2, a3, #9
+	add v2, a3, #30
 	cmp v1, v2
-	bhi release
+	blo release
 	bl konami
 	bl rotate_leds
 	str v1, [v3]
