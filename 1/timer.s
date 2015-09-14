@@ -31,6 +31,11 @@ initialise_timer1:
 	bx lr
 
 	.thumb_func
+	.globl initialise_letimer1
+initialise_letimer1:
+	bx lr
+
+	.thumb_func
 	.globl timer_handler
 timer_handler:
 	push {v1, lr}
