@@ -7,6 +7,7 @@
 	.thumb_func
 	.globl initialise_lfrco
 initialise_lfrco:
+	ldr a2, =CMU_BASE
 	mov a1, #0b1000000
 	str a1, [a2, #0x20]
 	mov a1, #0b1100011
