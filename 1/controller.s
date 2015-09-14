@@ -44,3 +44,26 @@ rotate_leds:
 	str a2, [a1, #GPIO_DOUT]
 	bx lr
 	
+	.thumb_func
+	.globl gpio_handler
+gpio_handler:
+	push {lr}
+	ldr a2, =GPIO_BASE
+	ldr a1, [a2, #GPIO_IF]
+	str a1, [a2, #GPIO_IFC]
+	ldr v3, =last_input
+	ldr a3, [v3]
+	ldr v1, =tick2
+	ldr v1, [v1]
+	add v2, a3, #20
+	cmp v1, v2
+	blo release
+	bl konami
+	bl rotate_leds
+	str v1, [v3]
+release:
+	pop {lr}
+	bx lr
+
+.section .bss
+	last_input: .long 0

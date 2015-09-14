@@ -14,7 +14,7 @@ LINKERSCRIPT=efm32gg.ld
 ex1.bin : ex1.elf
 	${OBJCOPY} -j .text -O binary $< $@
 
-ex1.elf : ex1.o vectors.o konami.o controller.o
+ex1.elf : ex1.o vectors.o konami.o controller.o timer.o
 	${LD} -T ${LINKERSCRIPT} $^ -o $@ ${LDFLAGS} 
 
 .PHONY : upload
