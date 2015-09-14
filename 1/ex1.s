@@ -37,7 +37,9 @@ zero_loop:
 	mov r2, #0x16 // Deep
 	//mov r2, #0x12
 	str r2, [r1]
+sleep_loop:
 	wfi
+	b sleep_loop
 .else
 	b .
 .endif
