@@ -13,6 +13,7 @@ _reset:
 
 	bl enable_peripherals
 	bl enable_zero_wait_state
+	bl enable_prefetch
 	bl initialise_lfrco
 	bl initialise_controller
 	bl initialise_letimer0
@@ -74,6 +75,15 @@ hfrco_status_wait:
 	ldr a1, =MSC_BASE
 	ldr a2, [a1, #MSC_READCTRL]
 	mov a3, #0x0
+	and a2, a3
+	str a2, [a1, #MSC_READCTRL]
+	bx lr
+
+	.thumb_func
+enable_prefetch:
+	ldr a1, =MSC_BASE
+	ldr a2, [a1, #MSC_READCTRL]
+	mov a3, #0x100
 	and a2, a3
 	str a2, [a1, #MSC_READCTRL]
 	bx lr
