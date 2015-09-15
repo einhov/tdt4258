@@ -16,6 +16,7 @@ zero_loop:
 	str a3, [a1], #4
 	cmp a1, a2
 	blo zero_loop
+	bl sram_powerdown
 
 	// Enable GPIO CMU
 	ldr a1, =CMU_BASE
@@ -50,3 +51,10 @@ sleep_loop:
 dummy_handler:  
 	b .
 
+	.thumb_func
+sram_powerdown:
+	// Power down SRAM blocks
+	ldr a1, =EMU_BASE
+	mov a2, #7
+	str a2, [a1, #EMU_MEMCTRL]
+	bx lr
