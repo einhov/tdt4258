@@ -24,20 +24,21 @@ zero_loop:
 
 	bl initialise_lfrco
 	bl initialise_controller
-	bl initialise_timer1
+	bl initialise_letimer0
 
 	// Enable interrupts
 	ldr a1, =ISER0
-	ldr a2, =0b1100000000010 // (1 << 12) & (1 << 11) & (1 << 1)
+	// (1 << 26) | (1 << 12) | (1 << 11) | (1 << 1)
+	ldr a2, =0x4000802
 	str a2, [a1]
 
 .ifdef DOSLEEP
 	// Enable sleep
-sleep_loop:
 	ldr a1, =SCR
 	mov a2, #0x16 // Deep
 	//mov a2, #0x12
 	str a2, [a1]
+sleep_loop:
 	wfi
 	b sleep_loop
 .else

@@ -39,7 +39,6 @@
 	.long   dummy_handler
 	.long   dummy_handler
 	.long   gpio_handler            /* GPIO odd handler */
-	.long   timer_handler           /* TIMER0 */
 	.long   dummy_handler
 	.long   dummy_handler
 	.long   dummy_handler
@@ -54,6 +53,7 @@
 	.long   dummy_handler
 	.long   dummy_handler
 	.long   dummy_handler
+	.long   letimer_handler
 	.long   dummy_handler
 	.long   dummy_handler
 	.long   dummy_handler

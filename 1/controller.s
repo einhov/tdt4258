@@ -53,9 +53,9 @@ gpio_handler:
 	str a1, [a2, #GPIO_IFC]
 	ldr v3, =last_input
 	ldr a3, [v3]
-	ldr v1, =tick2
+	ldr v1, =tick
 	ldr v1, [v1]
-	add v2, a3, #20
+	add v2, a3, #100
 	cmp v1, v2
 	blo release
 	bl konami
