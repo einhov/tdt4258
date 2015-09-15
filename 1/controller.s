@@ -2,6 +2,8 @@
 
 .include "efm32gg.s"
 
+DEBOUNCE_LIMIT = 100
+
 	.section .text
 
 	.globl initialise_controller
@@ -10,7 +12,7 @@
 initialise_controller:
 	// Enable controller LEDS
 	ldr a1, =GPIO_PA_BASE
-	mov a2, #2
+	mov a2, #GPIO_CTRL_HIGHEST
 	str a2, [a1, #GPIO_CTRL]
 	ldr a2, =0x55555555
 	str a2, [a1, #GPIO_MODEH]
@@ -55,7 +57,7 @@ gpio_handler:
 	ldr a3, [v3]
 	ldr v1, =tick
 	ldr v1, [v1]
-	add v2, a3, #100
+	add v2, a3, #DEBOUNCE_LIMIT
 	cmp v1, v2
 	blo release
 	bl konami

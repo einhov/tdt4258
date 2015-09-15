@@ -10,7 +10,7 @@ initialise_lfrco:
 	ldr a1, =CMU_BASE
 	mov a2, #0b1000000
 	str a2, [a1, #CMU_OSCENCMD]
-	ldr a3, =0x200
+	ldr a3, =(1<<CMU_OSCENCMD_LFRCOEN)
 status_wait:
 	ldr a2, [a1, #CMU_STATUS]
 	and a2, a3
@@ -22,19 +22,19 @@ status_wait:
 initialise_letimer0:
 	ldr a1, =CMU_BASE
 	ldr a2, [a1, #CMU_HFCORECLKEN0]
-	orr a2, #0x10
+	orr a2, #(1<<CMU_HFCORECLKEN0_LETIMER0)
 	str a2, [a1, #CMU_HFCORECLKEN0] // Enable LE peripherals
-	mov a2, #4
+	mov a2, #(1<<CMU_LFACLKEN0_LETIMER0)
 	str a2, [a1, #CMU_LFACLKEN0] // Enable LETIMER0
 	ldr a1, =LETIMER0_BASE
 	// (1<<9)
-	ldr a2, =0x200
+	ldr a2, =(1<<LETIMER_CTRL_COMP0TOP)
 	str a2, [a1, #LETIMER_CTRL] // Non-repeating count with reloading TOP
-	mov a2, #0x20
+	mov a2, #32 // 32768 / 32 = 1024
 	str a2, [a1, #LETIMER_COMP0] // TOP reload value
-	mov a2, #4
+	mov a2, #(1<<LETIMER_IEN_UF)
 	str a2, [a1, #LETIMER_IEN] // Enable underflow interrupt
-	mov a2, #1
+	mov a2, #(1<<LETIMER_CMD_START)
 	str a2, [a1, #LETIMER_CMD] // Start timer
 	bx lr
 

@@ -28,10 +28,10 @@ konami:
 
 	// We are done, reset code and do something
 	mov a3, #0
-	// Do something
+
 	ldr r1, =GPIO_PA_BASE
 	mov a4, #0xff
-	str a4, [r1, #GPIO_DOUT]
+	str a4, [r1, #GPIO_DOUT] // Turn off all lights
 
 skip:
 	str a3, [a2]

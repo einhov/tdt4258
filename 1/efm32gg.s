@@ -28,6 +28,11 @@
 	GPIO_DIN      = 0x1c
 	GPIO_PINLOCKN = 0x20
 
+	GPIO_CTRL_STANDARD = 0
+	GPIO_CTRL_LOWEST   = 1
+	GPIO_CTRL_HIGHEST  = 2
+	GPIO_CTRL_LOW      = 3
+
 	GPIO_BASE = 0x40006100
 
 	// register offsets from base address
@@ -53,8 +58,17 @@
 	CMU_HFPERCLKEN0 = 0x044
 	CMU_LFACLKEN0   = 0x058
 
-	CMU_HFPERCLKEN0_TIMER1 = 6
-	CMU_HFPERCLKEN0_GPIO = 13
+	CMU_OSCENCMD_LFRCOEN = 4
+
+	CMU_STATUS_HFRCOENS = 0
+	CMU_STATUS_HFRCORDY = 1
+
+	CMU_HFCORECLKEN0_LETIMER0 = 4
+
+	CMU_HFPERCLKEN0_TIMER1   = 6
+	CMU_HFPERCLKEN0_GPIO     = 13
+
+	CMU_LFACLKEN0_LETIMER0 = 2
 
 	//////////////////////////////////////////////////////////////////////
 	// Timer
@@ -93,6 +107,12 @@
 	LETIMER_SYNCBUSY = 0x34
 	LETIMER_ROUTE  = 0x38
 
+	LETIMER_CMD_START = 0
+
+	LETIMER_IEN_UF = 2
+
+	LETIMER_CTRL_COMP0TOP  = 9
+
 	//////////////////////////////////////////////////////////////////////
 	// MSC
 
@@ -100,6 +120,9 @@
 
 	MSC_CTRL     = 0x000
 	MSC_READCTRL = 0x004
+
+	MSC_READCTRL_MODE     = 0
+	MSC_READCTRL_PREFETCH = 8
 
 	//////////////////////////////////////////////////////////////////////
 	// NVIC
@@ -120,6 +143,10 @@
 	IPR2 = 0x08
 	IPR3 = 0x0c
 
+	ISER0_GPIO_EVEN = 1
+	ISER0_GPIO_ODD  = 11
+	ISER0_LETIMER0  = 26
+
 	//////////////////////////////////////////////////////////////////////
 	// EMU
 
@@ -128,10 +155,19 @@
 	EMU_CTRL = 0x000
 	EMU_MEMCTRL = 0x004
 
+	EMU_MEMCTRL_BLK123 = 0x07
+
 	//////////////////////////////////////////////////////////////////////
 	// System Control Block
 
 	SCR = 0xe000ed10
+
+	SCR_SLEEPONEXIT = 1
+	SCR_SLEEPDEEP   = 2
+	SCR_SEVONPEND   = 4
+
+	//////////////////////////////////////////////////////////////////////
+	// Controller buttons
 
 	CONTROLLER_LEFT_LEFT   = 0x01
 	CONTROLLER_LEFT_UP     = 0x02

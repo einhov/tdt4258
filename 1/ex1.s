@@ -20,8 +20,8 @@ _reset:
 	bl enable_interrupts
 
 .ifdef DOSLEEP
-	mov a1, #6 // Deep
-	//mov a1, #2 // Shallow
+	mov a1, #(1<<SCR_SLEEPONEXIT | 1<<SCR_SLEEPDEEP)
+	//mov a1, #(1<<SCR_SLEEPONEXIT)
 	bl configure_sleep
 
 sleep_loop:
@@ -40,7 +40,7 @@ dummy_handler:
 sram_powerdown:
 	// Power down SRAM blocks
 	ldr a1, =EMU_BASE
-	mov a2, #7
+	mov a2, #EMU_MEMCTRL_BLK123
 	str a2, [a1, #EMU_MEMCTRL]
 	bx lr
 
@@ -59,14 +59,14 @@ zero_loop:
 	.thumb_func
 enable_peripherals:
 	ldr a1, =CMU_BASE
-	mov a2, #0b10000000000000 // GPIO
+	mov a2, #(1<<CMU_HFPERCLKEN0_GPIO)
 	str a2, [a1, #CMU_HFPERCLKEN0]
 	bx lr
 
 	.thumb_func
 enable_zero_wait_state:
 	ldr a1, =CMU_BASE
-	mov a3, #0b10
+	mov a3, #(1<<CMU_STATUS_HFRCORDY)
 hfrco_status_wait:
 	ldr a2, [a1, #CMU_STATUS]
 	and a2, a3
@@ -74,7 +74,7 @@ hfrco_status_wait:
 	bne hfrco_status_wait
 	ldr a1, =MSC_BASE
 	ldr a2, [a1, #MSC_READCTRL]
-	mov a3, #0x0
+	mov a3, #(0<<MSC_READCTRL_MODE)
 	and a2, a3
 	str a2, [a1, #MSC_READCTRL]
 	bx lr
@@ -83,7 +83,7 @@ hfrco_status_wait:
 enable_prefetch:
 	ldr a1, =MSC_BASE
 	ldr a2, [a1, #MSC_READCTRL]
-	mov a3, #0x100
+	mov a3, #(1<<MSC_READCTRL_PREFETCH)
 	and a2, a3
 	str a2, [a1, #MSC_READCTRL]
 	bx lr
@@ -91,8 +91,7 @@ enable_prefetch:
 	.thumb_func
 enable_interrupts:
 	ldr a1, =ISER0
-	// (1 << 26) | (1 << 12) | (1 << 11) | (1 << 1)
-	ldr a2, =0x4000802
+	ldr a2, =(1<<ISER0_LETIMER0 | 1<<ISER0_GPIO_ODD | 1<<ISER0_GPIO_EVEN)
 	str a2, [a1]
 	bx lr
 
