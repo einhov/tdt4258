@@ -72,7 +72,11 @@
 	TIMER_TOPB   = 0x20
 	TIMER_CNT    = 0x24
 
+	//////////////////////////////////////////////////////////////////////
+	// LETIMER
+
 	LETIMER0_BASE  = 0x40082000
+
 	LETIMER_CTRL   = 0x00
 	LETIMER_CMD    = 0x04
 	LETIMER_STATUS = 0x08
