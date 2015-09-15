@@ -35,8 +35,8 @@ zero_loop:
 .ifdef DOSLEEP
 	// Enable sleep
 	ldr a1, =SCR
-	mov a2, #0x16 // Deep
-	//mov a2, #0x12
+	mov a2, #0x6 // Deep
+	//mov a2, #0x2
 	str a2, [a1]
 sleep_loop:
 	wfi
