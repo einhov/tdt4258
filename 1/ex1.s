@@ -19,7 +19,7 @@ zero_loop:
 
 	// Enable GPIO CMU
 	ldr a1, =CMU_BASE
-	mov a2, #0b10000001000000 // GPIO and TIMER1 enabled
+	mov a2, #0b10000000000000 // GPIO
 	str a2, [a1, #CMU_HFPERCLKEN0]
 
 	bl initialise_lfrco
