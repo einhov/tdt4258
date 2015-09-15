@@ -8,37 +8,20 @@
 	.type   _reset, %function
 	.thumb_func
 _reset: 
-	// Zero out BSS
-	ldr a1, =_sbss
-	ldr a2, =_ebss
-	mov a3, #0
-zero_loop:
-	str a3, [a1], #4
-	cmp a1, a2
-	blo zero_loop
 	bl sram_powerdown
+	bl zero_bss
 
-	// Enable GPIO CMU
-	ldr a1, =CMU_BASE
-	mov a2, #0b10000000000000 // GPIO
-	str a2, [a1, #CMU_HFPERCLKEN0]
-
+	bl enable_peripherals
 	bl initialise_lfrco
 	bl initialise_controller
 	bl initialise_letimer0
-
-	// Enable interrupts
-	ldr a1, =ISER0
-	// (1 << 26) | (1 << 12) | (1 << 11) | (1 << 1)
-	ldr a2, =0x4000802
-	str a2, [a1]
+	bl enable_interrupts
 
 .ifdef DOSLEEP
-	// Enable sleep
-	ldr a1, =SCR
-	mov a2, #0x6 // Deep
-	//mov a2, #0x2
-	str a2, [a1]
+	mov a1, #6 // Deep
+	//mov a1, #2 // Shallow
+	bl configure_sleep
+
 sleep_loop:
 	wfi
 	b sleep_loop
@@ -57,4 +40,37 @@ sram_powerdown:
 	ldr a1, =EMU_BASE
 	mov a2, #7
 	str a2, [a1, #EMU_MEMCTRL]
+	bx lr
+
+	.thumb_func
+zero_bss:
+	// Zero out BSS
+	ldr a1, =_sbss
+	ldr a2, =_ebss
+	mov a3, #0
+zero_loop:
+	str a3, [a1], #4
+	cmp a1, a2
+	blo zero_loop
+	bx lr
+
+	.thumb_func
+enable_peripherals:
+	ldr a1, =CMU_BASE
+	mov a2, #0b10000000000000 // GPIO
+	str a2, [a1, #CMU_HFPERCLKEN0]
+	bx lr
+
+	.thumb_func
+enable_interrupts:
+	ldr a1, =ISER0
+	// (1 << 26) | (1 << 12) | (1 << 11) | (1 << 1)
+	ldr a2, =0x4000802
+	str a2, [a1]
+	bx lr
+
+	.thumb_func
+configure_sleep:
+	ldr a2, =SCR
+	str a1, [a2]
 	bx lr
