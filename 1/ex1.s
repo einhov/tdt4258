@@ -12,6 +12,7 @@ _reset:
 	bl zero_bss
 
 	bl enable_peripherals
+	bl enable_zero_wait_state
 	bl initialise_lfrco
 	bl initialise_controller
 	bl initialise_letimer0
@@ -59,6 +60,22 @@ enable_peripherals:
 	ldr a1, =CMU_BASE
 	mov a2, #0b10000000000000 // GPIO
 	str a2, [a1, #CMU_HFPERCLKEN0]
+	bx lr
+
+	.thumb_func
+enable_zero_wait_state:
+	ldr a1, =CMU_BASE
+	mov a3, #0b10
+hfrco_status_wait:
+	ldr a2, [a1, #CMU_STATUS]
+	and a2, a3
+	cmp a2, a3
+	bne hfrco_status_wait
+	ldr a1, =MSC_BASE
+	ldr a2, [a1, #MSC_READCTRL]
+	mov a3, #0x0
+	and a2, a3
+	str a2, [a1, #MSC_READCTRL]
 	bx lr
 
 	.thumb_func
