@@ -3,7 +3,7 @@
 # Exercise 1, TDT4258
 
 LD=arm-none-eabi-ld
-AS=arm-none-eabi-as
+AS=arm-none-eabi-as --defsym DOSLEEP=1
 OBJCOPY=arm-none-eabi-objcopy
 
 LDFLAGS=-nostdlib
