@@ -2,7 +2,7 @@
 
 .include "efm32gg.s"
 
-DEBOUNCE_LIMIT = 100
+DEBOUNCE_LIMIT = 1
 
 	.section .text
 

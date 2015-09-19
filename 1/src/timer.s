@@ -27,10 +27,9 @@ initialise_letimer0:
 	mov a2, #(1<<CMU_LFACLKEN0_LETIMER0)
 	str a2, [a1, #CMU_LFACLKEN0] // Enable LETIMER0
 	ldr a1, =LETIMER0_BASE
-	// (1<<9)
 	ldr a2, =(1<<LETIMER_CTRL_COMP0TOP)
 	str a2, [a1, #LETIMER_CTRL] // Non-repeating count with reloading TOP
-	mov a2, #32 // 32768 / 32 = 1024
+	mov a2, #4096 // 32768 / 4096 = 8
 	str a2, [a1, #LETIMER_COMP0] // TOP reload value
 	mov a2, #(1<<LETIMER_IEN_UF)
 	str a2, [a1, #LETIMER_IEN] // Enable underflow interrupt
@@ -38,8 +37,8 @@ initialise_letimer0:
 	str a2, [a1, #LETIMER_CMD] // Start timer
 	bx lr
 
-	/* This is called at 2^15 / 2^5 = 2^10 Hz (1024 Hz) and tick variable is incremented.
-	 * Every 1024 tick (i.e. at approx. 1 Hz) flip the LEDs
+	/* This is called at 2^15 / 2^12 = 2^3 Hz (8 Hz) and tick variable is incremented.
+	 * Every 8 ticks (i.e. at approx. 1 Hz) flip the LEDs
 	*/
 	.thumb_func
 	.globl letimer_handler
@@ -50,7 +49,7 @@ letimer_handler:
 	add a2, #1
 	str a2, [a1]
 
-	lsls a2, #23
+	lsls a2, #29
 	it eq
 	bleq rotate_leds
 
