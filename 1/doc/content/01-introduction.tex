@@ -1,21 +1,21 @@
 \chapter{Introduction}
 
-``Let there be light'', he said, and through lines of Assembly code the LED
-lights started to flicker at one hertz each. The task at hand was to write
-assembly code, which would be flashed onto the flash memory on the
-microcontroller unit.
+``Let there be light'' he said, and pressed the reset button. Immidiately the compiled Assembly code sent the signal to the LED lights, and they started blinking. Back and forth, on and off, 0 and 1, the lights turned on and then off again, continously every second.
 
-Manipulating the Assembly code is consisting of changing values at a specific
-register in order to turn on lights. The code may also be manipulated and
-changed based on input from a specific gamedpad supplied for the task. The
-gamepad includes eight buttons and the same amount of LED lights which is used
-for both the inputs and also the outputs in this exercise.
+For this exercise, we were supplied with a Development Kit, consisting of a microcontroller unit, a motherboard and a prototyping board. We were also supplied with a custom gamepad and manuals for all of these parts. In addition to this, we got a thorough explanation on how to connect the computer to the board and flash the compiled Assembly code to the flash memory of the microcontroller unit.
 
-The exercise only specified that we should learn startup code for ARM
-processors and how to program GPIO. This would be used to detect button presses
-on the gamepad and to turn on or off LED lights. Since we did not get any other
-tasks for this exercise, we decided to get creative and write an Assembly code
-which would accept a specific sequence of inputs and blink all the lights if
-done correctly. Until this has happened every odd-numbered light has an on
-state and every even-numbered light has an off state, and every second all
-lights are flipped to the other state.
+The Assembly code is manipulated by changing values at a specific
+register in order to turn on lights. Events may also happen based on input from the provided gamepad. The
+gamepad includes eight buttons and the same amount of LED lights which is used respectively
+for the inputs and the outputs in this exercise.
+
+The exercise specified that we should learn startup code for ARM processors
+and how to program GPIO. This would be used to detect button presses on the
+gamepad and to turn on or off LED lights. Since we did not get any other tasks
+for this exercise, we decided to get creative and write an Assembly code which
+would accept a specific sequence of inputs and blink all the lights if done
+correctly. Until this has happened every odd-numbered light has an on state and
+every even-numbered light has an off state, and every second all lights are
+flipped to the other state.
+
+Another point we decided to check was whether or not different alternatives would yield different results in energy consumptions. We focused on using timers and their ability to accurately flip the lights and their preferred usage over loops, where timers do not require the CPU to be active at all times.
