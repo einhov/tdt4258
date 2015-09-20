@@ -16,7 +16,10 @@ code to run at all. The CPU uses an \emph{Exception Vector Table} containing
 addresses to exception handlers to know what code that should be executed when
 different exceptions are triggered in the CPU. The Vector Table also contains
 the initial address for the top of the stack. At system reset the CPU will start
-executing the reset handler.
+executing the reset handler. We populated the Exception Vector Table with an
+initial stack address, the address of our reset function and filled the rest
+with the address of a dummy handler that does nothing. Our initial reset
+function just a branch to itself, looping forever and doing nothing.
 
 \subsection{Let there be light}
 
@@ -50,19 +53,97 @@ would be better if we could have the CPU be told when a button is pressed. There
 is support for this in the GPIO peripheral and in the CPU. The GPIO peripheral
 can be configured to issue an interrupt to the CPU when a GPIO pin is pulled
 high or low. Upon receiving this interrupt the CPU will execute code from the
-address set as the GPIO handlers in the Vector Table. By writing 2 to all the
-fields of {\tt GPIO\_EXTIPSELL} we selected that the GPIO interrupts 0-7 all
-should be driven by pins from GPIO port C. We wanted the buttons to issue
-interrupts when pressed and not when released. To get this behaviour we found
-out that we had to configure the pins to issue an interrupt on a falling edge
-and to not issue an interrupt on a rising edge. This was done by setting bits
-7:0 of {\tt GPIO\_EXTIFALL} and leaving bits 7:0 of {\tt GPIO\_EXTIRISE} clear.
-The final step necessary in the GPIO peripheral was to enable interrupts for the
-GPIO pins, by setting bits 7:0 of {\tt GPIO\_IEN}. Finally, GPIO interrupts must
-be enabled in the CPU's \emph{Nested Vector Interrupt Controller}
-(\textbf{NVIC}). This was done by setting the bits corresponding to the odd- and
-even GPIO exceptions of the NVIC's {\tt ISER0} (Interrupt Set-Enable) register.
-Following this, pressing a button on the controller would cause the GPIO
-exception handler function to be executed.
+address set as the GPIO handlers in the Vector Table, which we pointed to a
+function we wrote named {\tt gpio\_handler}. By writing 2 to all the fields of
+{\tt GPIO\_EXTIPSELL} we selected that the GPIO interrupts 0-7 all should be
+driven by pins from GPIO port C. We wanted the buttons to issue interrupts when
+pressed and not when released. To get this behaviour we found out that we had to
+configure the pins to issue an interrupt on a falling edge and to not issue an
+interrupt on a rising edge. This was done by setting bits 7:0 of {\tt
+GPIO\_EXTIFALL} and leaving bits 7:0 of {\tt GPIO\_EXTIRISE} clear.  The final
+step necessary in the GPIO peripheral was to enable interrupts for the GPIO
+pins, by setting bits 7:0 of {\tt GPIO\_IEN}. Finally, GPIO interrupts must be
+enabled in the CPU's \emph{Nested Vector Interrupt Controller} (\textbf{NVIC}).
+This was done by setting the two bits corresponding to the odd- and even GPIO
+exceptions of the NVIC's {\tt ISER0} (Interrupt Set-Enable) register. Following
+this, pressing a button on the controller would cause the GPIO exception handler
+function to be executed.
+
+Now that we had the ability to run code on demand by pushing buttons, we were
+set to manipulate the lights with the controller. We wrote a function {\tt
+rotate\_leds} that read the current status of the LED GPIO pins from {\tt
+GPIO\_PA\_DOUT}, bitwise negated the value, and wrote back to the register.
+Branching to this function from {\tt gpio\_handler}, we would now flip the LEDs
+on the controller board every time we pushed a button on the controller.
+
+\subsection{BSS}
+
+We soon come to a part of the implementation that uses read-write variables
+stored in SRAM. Our code expects its variables to be zero upon system reset, but
+the MCU does not take care of this for us. Therefore we had to write code that
+sets the memory cells of all our SRAM variables to 0. We implemented this as a
+loop in the {\tt bss\_zero} function and called this early in the program.
+
+\subsection{Timers}
+
+Flipping lights with buttons is all quite exciting, but we wanted the lights to
+flip on their own. A na\"{\i}ve solution to this problem is to run a loop in the
+main thread that calls {\tt rotate\_leds} every \textit{N}th iteration. This is
+not a very good solution, as we will see later when we wish to put the CPU to
+sleep to reduce energy consumption. Luckily the MCU contains various timers that
+we can use to keep track of time and schedule interrupts. After experimentation
+we ended up settling on the \emph{Low Energy Timer} (\textbf{LETIMER0}) due to
+its availability in EM2. The timer has to be backed by a clock, in our case we
+chose to use the \emph{Low Frequency RC Oscillator} clock (\textbf{LFRCO}
+clock).
+
+First we turned on the LFRCO. This was done by setting {\tt
+CMU\_OSCENCMD[LFRCOEN]}. The clock will take some time to initialise and become
+stable, so after enabling it we read {\tt CMU\_STATUS} in a loop until {\tt
+CMU\_STATUS[LFRCORDY]} is set, which signals that the clock is initialised and
+stable. With the LFRCO clock running we turned to setting up the timer, but
+first we had the enable the LETIMER0 peripheral, and also low energy peripherals
+in general. First, to enable low energy peripherals we set the {\tt
+CMU\_HFCORECLKEN0[LE]} bit. After the low energy peripherals were enabled, we
+set the {\tt CMU\_LFACLKEN0[LETIMER0]} bit to enable LETIMER0.
+
+The LETIMER0 can be operated in various modes. For our usage we used a mode
+where the timer to counts forever from a top value towards zero and upon
+reaching zero issues an interrupt to the CPU and starts counting again from the
+top value. To select this mode we set {\tt LETIMER0\_CTRL[COMP0TOP]} to use the
+{\tt LETIMER0\_COMP0} register as the TOP value. We left {\tt
+LETIMER0\_CTRL[REPMODE]} cleared as that left it in the counting mode we
+intended to use. {\tt LETIMER0\_COMP0} was then loaded with the TOP value, which
+in our solution is 4096. As the LFRCO clock has a frequency of 32768 Hz, this
+gave our timer an underflow frequency of \( \frac{32768}{4096} = 8 \) Hz. This
+means that our timer will interrupt the CPU 8 times every second. Finally we
+enabled interrupt on underflow by setting {\tt LETIMER0\_IEN[UF]} and started
+the timer by setting {\tt LETIMER0\_CMD[START]}.
+
+At this point we had a timer issuing interrupts, but no handler for the
+interrupts, nor is the interrupt enabled in the NVIC. We wrote a function {\tt
+letimer\_handler} and registered it as the handler for interrupts from the
+LETIMER in the Interrupt Vector Table. {\tt letimer\_handler}'s primary task is
+to increment a variable {\tt tick} stored in memory. The {\tt LETIMER0\_IFC[UF]}
+bit is also cleared so the system knows the inerrupt has been handled. If \(
+{\tt tick} \equiv 0 \pmod 8 \) the {\tt rotate\_leds} function is also called.
+We then enabled the LETIMER0 interrupt in the NVIC by setting {\tt
+ISER0\_LETIMER0} and obtained lights flipping at 1Hz.
+
+\subsection{The Konami Code}
+
+The goal we set was to change the pattern of the LED lights when a certain
+sequence of button inputs were given. The exact sequence we implemented is a
+well known cheat code from the mid-1980s called the Konami Code. To recognise
+the code we wrote a simple state machine in a function {\tt konami}. The
+function uses a constant array {\tt konami\_code} of input values for the code
+and a global index variable {\tt konami\_current} to keep track of progress
+through the code. It takes a button value as input, compares it to {\tt
+konami\_code[konami\_current]} and acts based on whether it is the next button
+in the sequence; if the button is correct {\tt konami\_current} is incremented,
+if it is incorrect it is set back to 0. If {\tt konami\_current} goes past the
+end of {\tt konami\_code} we clear bits 15:8 of {\tt GPIO\_PA\_DOUT} to turn all
+the LEDs on. We then called this function from {\tt gpio\_handler} with the
+pressed button as argument.
 
 \section{Testing}
