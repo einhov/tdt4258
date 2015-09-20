@@ -146,4 +146,19 @@ end of {\tt konami\_code} we clear bits 15:8 of {\tt GPIO\_PA\_DOUT} to turn all
 the LEDs on. We then called this function from {\tt gpio\_handler} with the
 pressed button as argument.
 
+\subsection{Debounce}
+
+During implementation we discovered that the controller board was not a flawless
+piece of hardware engineering. The GPIO controller would frequently detect
+multiple falling edges per button press, causing our program to see spurious
+inputs. This was for obvious reasons not ideal for our code recognition program.
+In an attempt to make the controller input more reliable we came up with a
+method to debounce the signal in software. In our {\tt gpio\_handler} we
+recorded the value of {\tt tick} into a new variable {\tt last\_input} when we
+accepted input as genuine and on every invocation checked the current {\tt tick}
+to {\tt last\_tick}. If \({\tt tick} > {\tt last\_tick}\) we accepted the button
+press as genuine. As {\tt tick} increments at 8Hz this means that inputs
+registered within \(8^{-1} = 0.125\)s of a geniune input was dropped.
+
+
 \section{Testing}
