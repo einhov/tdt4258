@@ -1,16 +1,68 @@
 \chapter{Methodology}
-% This chapter should discuss the details of your implementation for the assignment. 
-% Everything related to \emph{how} things were done should go here.
-% Remember to avoid going into too much details, summarize appropriately and try to use figures/charts.
-% Make sure you refer to the figures (such as Figure \ref{fig:universe}) and charts you add in the text.
-% Avoid putting lots of source code here -- small code snippets are fine if you want to discuss something specific.
 
-% \begin{figure}
-% \centering
-% \includegraphics[scale=1.7]{images/universe.jpg}
-% \caption{A JPEG image of a galaxy. Use vector graphics instead if you can.}
-% \label{fig:universe}
-% \end{figure}
+\section{Implementation}
 
-% \section{Testing}
-% Add content in this section that describes how you tested and verified the correctness of your implementation, with respect to the requirements of the assignment.
+Most of the implementation involves manipulation of hardware registers of
+involved peripherals. Names of the registers as they appear in this report have
+been taken from the EFM32GG Reference Manual. [ADD CITATION] Register names
+follow a pattern of {\tt SUBSYSTEM\_REGISTERNAME}. For instance, the Control
+Register of the CMU is called  {\tt CMU\_CTRL}. Names for individual fields
+inside the registers have also been taken from the manual. When referring to the
+Debug Clock selector field of the {\tt CMU\_CTRL} register, we write {\tt
+CMU\_CTRL[DBGCLK]}.
+
+However, before we could start playing with the peripherals, we had to get some
+code to run at all. The CPU uses an \emph{Exception Vector Table} containing
+addresses to exception handlers to know what code that should be executed when
+different exceptions are triggered in the CPU. The Vector Table also contains
+the initial address for the top of the stack. At system reset the CPU will start
+executing the reset handler.
+
+\subsection{Let there be light}
+
+As the goal of this exercise was to manipulate the LED lights on the controller
+board in some way according to button input, a natural starting point is to get
+some lights enabled. From system reset most peripherials of the MCU were
+disabled, so in order to light the LEDs we first had to enable the GPIO
+peripherals in the MCU's \emph{Clock Management Unit} (\textbf{CMU}). To enable
+the GPIO peripherals we set {\tt CMU\_HFPERCLKEN0[GPIO]} to 1.
+
+After enabling the GPIO system we configured the LED lights' GPIO pins to drive
+output to the LEDs. The LEDs are connected to GPIO port A and are configured
+with the {\tt GPIO\_PA\_x} registers. First we set the drive strength to high by
+writing 2 to {\tt GPIO\_PA\_CTRL}. Further we set all the pins as output pins
+based on the drive strength, by setting all fields of {\tt GPIO\_PA\_MODEH} to
+{\tt PUSHPULLDRIVE}. At this point the pins were properly configured, and we
+could turn on lights by clearing bits 15:8 of {\tt GPIO\_PA\_DOUT}.
+
+\subsection{Reading input and interrupts}
+
+The steps to enable input from the GPIO pins of port C connected to the
+controller board's buttons were similar to those for enabling the LEDs. We set
+the pins to a proper mode by setting all pins of {\tt GPIO\_PC\_MODEL} to {\tt
+INPUTPULL} and made the pins active high by setting bits 7:0 of {\tt
+GPIO\_PC\_DOUT}. After this we could poll {\tt GPIO\_PC\_DIN} for status of the
+individual buttons.
+
+Polling the {\tt GPIO\_PC\_DIN} register for button status works fine, but it is
+very wasteful to have the CPU constantly run in a loop to regularily do so. It
+would be better if we could have the CPU be told when a button is pressed. There
+is support for this in the GPIO peripheral and in the CPU. The GPIO peripheral
+can be configured to issue an interrupt to the CPU when a GPIO pin is pulled
+high or low. Upon receiving this interrupt the CPU will execute code from the
+address set as the GPIO handlers in the Vector Table. By writing 2 to all the
+fields of {\tt GPIO\_EXTIPSELL} we selected that the GPIO interrupts 0-7 all
+should be driven by pins from GPIO port C. We wanted the buttons to issue
+interrupts when pressed and not when released. To get this behaviour we found
+out that we had to configure the pins to issue an interrupt on a falling edge
+and to not issue an interrupt on a rising edge. This was done by setting bits
+7:0 of {\tt GPIO\_EXTIFALL} and leaving bits 7:0 of {\tt GPIO\_EXTIRISE} clear.
+The final step necessary in the GPIO peripheral was to enable interrupts for the
+GPIO pins, by setting bits 7:0 of {\tt GPIO\_IEN}. Finally, GPIO interrupts must
+be enabled in the CPU's \emph{Nested Vector Interrupt Controller}
+(\textbf{NVIC}). This was done by setting the bits corresponding to the odd- and
+even GPIO exceptions of the NVIC's {\tt ISER0} (Interrupt Set-Enable) register.
+Following this, pressing a button on the controller would cause the GPIO
+exception handler function to be executed.
+
+\section{Testing}
