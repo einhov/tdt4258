@@ -1,3 +1,42 @@
 \chapter{Results}
-% In this chapter, you should discuss the results you have obtained from your implementation.
-% These can be correctness results, i.e whether the implementation behaved as expected, or numerical results that express runtime or energy measurements.
+
+\section{Correctness}
+
+There is not much to write about the correctness results for our program. Our
+program behaves as expected in that we can successfully input the Konami Code
+and observe a change of pattern in the LED lights. Further, from testing of our
+debounce system we have learned that some spurious inputs do get filtered by it.
+We claim this because spurious inputs were counted in test runs where the code
+was successfully accepted by the state machine.
+
+\section{Energy efficiency}
+
+We saw quite large energy savings as we took use of some of the energy saving
+features. Most importantly was getting from EM0 to EM2. At EM0 we read an
+average energy consumption of 3.6mA. Moving to EM1 got us to 1.44mA. While that
+is a significant difference, moving to EM2 is what really allowed us to cut down
+on energy consumption. Going to EM2 with the same functionality, we registered
+only about 2.5uA. After reaching EM2 we turned to disabling parts of the MCU
+that are not needed by our program and enabling optional features that could
+improve efficiency.
+
+Our first approach was to experiment with the system's clocks. In our final
+program we have two clocks active: the \emph{High Frequency RC Oscillator}
+(\textbf{HFRCO}) and the LFRCO discussed in chapter 3. We hypothesised that if
+we ran the core clock from the LFRCO as well and turned off the HFRCO, we could
+save energy by disabling the HFRCO. This turned out to be wrong, as energy usage
+jumped into the 100s of uA when we ran the core clock from LFRCO. We expect to
+be the case because the CPU takes longer to finish its work when interrupted and
+thus the MCU gets back to EM2 slower than when the CPU is operating at a higher
+frequency. We also tried to run LETIMER0 at a higher interrupt frequency while
+the core clock ran on the HFRCO. At 1024Hz the energy consumption measured
+around 20uA. It is clear to us that keeping the CPU in sleep mode as much as
+possible is essential.
+
+The remaining optimisations we have in the final program are powering down
+unused SRAM blocks and enabling zero wait-state reads from Flash. Additionally
+we also tried enabling instruction prefetching from Flash.
+
+Another observation we made is that the LED lights on the controller will use
+hundreds of mA combined while in use. This makes the energy efficieny aspect of
+this exercise quite academic.
