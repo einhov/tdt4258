@@ -4,7 +4,7 @@
 
 Most of the implementation involves manipulation of hardware registers of
 involved peripherals. Names of the registers as they appear in this report have
-been taken from the EFM32GG Reference Manual. [ADD CITATION] Register names
+been taken from the EFM32GG Reference Manual. \cite{EFM32GGManual} Register names
 follow a pattern of {\tt SUBSYSTEM\_REGISTERNAME}. For instance, the Control
 Register of the CMU is called  {\tt CMU\_CTRL}. Names for individual fields
 inside the registers have also been taken from the manual. When referring to the
@@ -14,21 +14,23 @@ CMU\_CTRL[DBGCLK]}.
 However, before we could start playing with the peripherals, we had to get some
 code to run at all. The CPU uses an \emph{Exception Vector Table} containing
 addresses to exception handlers to know what code that should be executed when
-different exceptions are triggered in the CPU. The Vector Table also contains
-the initial address for the top of the stack. At system reset the CPU will start
-executing the reset handler. We populated the Exception Vector Table with an
-initial stack address, the address of our reset function and filled the rest
-with the address of a dummy handler that does nothing. Our initial reset
-function just a branch to itself, looping forever and doing nothing.
+different exceptions are triggered in the CPU. \cite{CortexM3Manual} The Vector
+Table also contains the initial address for the top of the stack. At system
+reset the CPU will start executing the reset handler. We populated the Exception
+Vector Table with an initial stack address, the address of our reset function
+and filled the rest with the address of a dummy handler that does nothing. Our
+initial reset function just a branch to itself, looping forever and doing
+nothing.
 
 \subsection{Let there be light}
 
 As the goal of this exercise was to manipulate the LED lights on the controller
 board in some way according to button input, a natural starting point is to get
 some lights enabled. From system reset most peripherials of the MCU were
-disabled, so in order to light the LEDs we first had to enable the GPIO
-peripherals in the MCU's \emph{Clock Management Unit} (\textbf{CMU}). To enable
-the GPIO peripherals we set {\tt CMU\_HFPERCLKEN0[GPIO]} to 1.
+disabled, so in order to light the LEDs we first had to
+enable the GPIO peripherals in the MCU's \emph{Clock Management Unit}
+(\textbf{CMU}). \cite{EFM32GGManual} To enable the GPIO peripherals we set {\tt
+CMU\_HFPERCLKEN0[GPIO]} to 1.
 
 After enabling the GPIO system we configured the LED lights' GPIO pins to drive
 output to the LEDs. The LEDs are connected to GPIO port A and are configured
