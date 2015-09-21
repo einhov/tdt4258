@@ -22,15 +22,28 @@ and filled the rest with the address of a dummy handler that does nothing. Our
 initial reset function just a branch to itself, looping forever and doing
 nothing.
 
+Our implementation has tried to follow the ARM EABI for register usage and
+function parameter passing.
+
 \subsection{Let there be light}
 
 As the goal of this exercise was to manipulate the LED lights on the controller
 board in some way according to button input, a natural starting point is to get
 some lights enabled. From system reset most peripherials of the MCU were
-disabled, so in order to light the LEDs we first had to
-enable the GPIO peripherals in the MCU's \emph{Clock Management Unit}
-(\textbf{CMU}). \cite{EFM32GGManual} To enable the GPIO peripherals we set {\tt
-CMU\_HFPERCLKEN0[GPIO]} to 1.
+disabled, so in order to light the LEDs we first had to enable the GPIO
+peripherals in the MCU's \emph{Clock Management Unit} (\textbf{CMU}).
+\cite{EFM32GGManual} To enable the GPIO peripherals we set {\tt
+CMU\_HFPERCLKEN0[GPIO]} to 1. (Fig \ref{code:settingregister})
+
+\begin{figure}[h]
+	\caption{Setting a bit in a memory-mapped register}
+	\label{code:settingregister}
+	\begin{lstlisting}[frame=single]
+	ldr a1, =CMU_BASE
+	mov a2, #(1<<CMU_HFPERCLKEN0_GPIO)
+	str a2, [a1, #CMU_HFPERCLKEN0]
+	\end{lstlisting}
+\end{figure}
 
 After enabling the GPIO system we configured the LED lights' GPIO pins to drive
 output to the LEDs. The LEDs are connected to GPIO port A and are configured
@@ -78,13 +91,48 @@ GPIO\_PA\_DOUT}, bitwise negated the value, and wrote back to the register.
 Branching to this function from {\tt gpio\_handler}, we would now flip the LEDs
 on the controller board every time we pushed a button on the controller.
 
+\begin{figure}[h]
+	\caption{\texttt{rotate\_leds}}
+	\label{code:rotate_leds}
+	\begin{lstlisting}[frame=single]
+	.thumb_func
+	.type  rotate_leds, %function
+	.globl rotate_leds
+rotate_leds:
+	ldr a1, =GPIO_PA_BASE
+	ldr a2, [a1, #GPIO_DOUT]
+	mvn a2, a2
+	str a2, [a1, #GPIO_DOUT]
+	bx lr
+	\end{lstlisting}
+\end{figure}
+
 \subsection{BSS}
 
 We soon come to a part of the implementation that uses read-write variables
 stored in SRAM. Our code expects its variables to be zero upon system reset, but
 the MCU does not take care of this for us. Therefore we had to write code that
 sets the memory cells of all our SRAM variables to 0. We implemented this as a
-loop in the {\tt bss\_zero} function and called this early in the program.
+loop in the {\tt bss\_zero} function (Fig \ref{code:zero_bss}) and called this
+early in the program. Start and end addresses for the BSS section of memory are
+defined in the linker script for the final executable and resolved at link time.
+
+\begin{figure}[h]
+	\caption{\texttt{zero\_bss}}
+	\label{code:zero_bss}
+	\begin{lstlisting}[frame=single]
+	.thumb_func
+zero_bss:
+	ldr a1, =_sbss
+	ldr a2, =_ebss
+	mov a3, #0
+zero_loop:
+	str a3, [a1], #4
+	cmp a1, a2
+	blo zero_loop
+	bx lr
+	\end{lstlisting}
+\end{figure}
 
 \subsection{Timers}
 
@@ -129,8 +177,19 @@ LETIMER in the Interrupt Vector Table. {\tt letimer\_handler}'s primary task is
 to increment a variable {\tt tick} stored in memory. The {\tt LETIMER0\_IFC[UF]}
 bit is also cleared so the system knows the inerrupt has been handled. If \(
 {\tt tick} \equiv 0 \pmod 8 \) the {\tt rotate\_leds} function is also called.
+(Fig \ref{code:mod})
 We then enabled the LETIMER0 interrupt in the NVIC by setting {\tt
 ISER0\_LETIMER0} and obtained lights flipping at 1Hz.
+
+\begin{figure}[h]
+	\caption{\( {\tt tick} \equiv 0 \pmod 8 \) check in optimised asm}
+	\label{code:mod}
+	\begin{lstlisting}[frame=single]
+	lsls a2, #29     // a2 = tick
+	it eq
+	bleq rotate_leds
+	\end{lstlisting}
+\end{figure}
 
 \subsection{The Konami Code}
 
@@ -168,14 +227,14 @@ interrupt rather than running it at 1Hz.
 
 Our solution uses various techniques to use as little energy as possible. Most
 important is putting the CPU to sleep when not in use. This is done by issuing a
-a {\tt wfi} instruction in the main thread instead of looping forever. By
-default this will drop the MCU into EM1. However, the LETIMER0 is a low energy
-peripheral that is active also in EM2. For our program we can thus configure the
-\emph{Energy Management Unit} (\textbf{EMU}) to enter EM2 instead of EM1. We did
-this by setting the {\tt SLEEPDEEP} bit of {\tt SCR}, the \emph{System Control
-Register}. We also set the {\tt SLEEPONEXIT} bit to automatically go back to
-sleep after returning from an exception, rather than having the main thread wake
-up and looping into a new {\tt wfi}.
+a {\tt wfi} instruction in the main thread instead of looping forever.
+\cite{CortexM3Manual} By default this will drop the MCU into EM1. However, the
+LETIMER0 is a low energy peripheral that is active also in EM2. For our program
+we can thus configure the \emph{Energy Management Unit} (\textbf{EMU}) to enter
+EM2 instead of EM1. We did this by setting the {\tt SLEEPDEEP} bit of {\tt SCR},
+the \emph{System Control Register}. We also set the {\tt SLEEPONEXIT} bit to
+automatically go back to sleep after returning from an exception, rather than
+having the main thread wake up and looping into a new {\tt wfi}.
 
 Two smaller energy optimisations in the final program are turning off unused
 SRAM blocks and enabling zero wait-state reads from Flash. The unused SRAM
