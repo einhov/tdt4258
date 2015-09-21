@@ -1,23 +1,36 @@
 \chapter{Conclusion}
-% This chapter should be a look back at the entire report and summarizing the problem, the solution and the obtained results.
-This exercise was supposed to teach us how different functions worked,
-and how they could be implemented to satisfy a certain statement.
 
-What we did was write code in Assembly and compile it into machine code. That machine code was then flashed onto the flash memory of the microcontroller unit. This code would be used by the motherboard and react to certain events. The CPU could be put to sleep due to inactivity, or certain methods incurred due to activity.
+In this exercise we wrote a program for a development kit for an MCU designed
+for embedded applications. The program was implemented in ARM Assembly and
+compiled into machine code. This machine code was then flashed onto the flash
+memory of the MCU. The code included both a reset handler with instructions for
+the CPU as it starts and instructions for how the CPU should act in response to
+certain exceptions.
 
-The main task we had was to create machine code, which could react to interactions with the buttons and provide a signal. This signal could be used to create methods or events that would happen if this signal was to occur. These methods or events would create appropriate outputs to the LED lights on the provided gamepad to show that the code produced was in a working and stable condition.
+Our main task was to create a program which would react to interactions with
+buttons and provide some sort of result by manipulating an array of LED lights.
+To start with we implemented a polling loop that repeatedly applied input values
+from the buttons over the output for the lights. In search for more efficient,
+and more interesting, solutions we replicated the functionality with interrupts
+while the CPU mainly slept.
 
-We decided to get creative and made machine code which would use a timer and
-a clock to rotate the LED lights in a specified pattern. We also made a specific 
-sequence of inputs which would trigger the timer and the LED lights would then 
-no longer rotate, but rather that all LEDs would flip between an on state and
-an off state.
+We decided to get creative and set a goal beyond a direct mapping between button
+presses and light states. We ended up with a program which uses a timer driven
+by a clock to rotate the LED lights in a specific pattern and at a specific
+interval. We also made the program recognise a specific sequence of inputs which
+would trigger a change in the light's pattern.
 
-What we discovered during this is that with alternative ways to do 
-the main task, we could get different values of energy consumption. These values 
-does not vary much and in a effiency way, it does not create a major difference. 
-However, this is, in an academic sense, still something worth noting as there is 
-more effiecent ways of completing certain tasks. 
-
-% \section{Evaluation of the Assignment}
-% You can include comments about the assignment itself here. While this part is not obligatory and not graded, it is valuable feedback to the course staff that can be used to improve the exercises in the future.
+During the exercise we learnt that there are multiple ways to achieve our task
+with the tools the MCU provides. From observing energy consumption levels as we
+experimented with the different tools we realised that the different tools had
+noticable differences in energy requirements, and often vastly so. It became
+clear that to maximise energy efficiency we had to choose carefully what tools
+to apply to solve the task, and configure them appropriately. In the end we had
+a program using around 1.7uA of energy while rotating lights and waiting for
+button presses. That is, around \(1/2000\)th of the initial implementation. It
+is clear that careful design of software for this MCU may result in large energy
+savings. We also observed that the LEDs we powered pulled up to over 100mA, so
+in the scope of the program some of the energy optimisations on the MCU were
+felt to be rather insignificant. We do, however, appreciate that they may be
+valuable in optimising applications with less energy demanding external
+components.
