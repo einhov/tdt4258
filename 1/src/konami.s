@@ -30,8 +30,7 @@ konami:
 	mov a3, #0
 
 	ldr r1, =GPIO_PA_BASE
-	mov a4, #0xff
-	str a4, [r1, #GPIO_DOUT] // Turn off all lights
+	str a3, [r1, #GPIO_DOUT] // Turn on all lights
 
 skip:
 	str a3, [a2]
