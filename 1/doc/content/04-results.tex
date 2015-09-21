@@ -1,3 +1,91 @@
 \chapter{Results}
-% In this chapter, you should discuss the results you have obtained from your implementation.
-% These can be correctness results, i.e whether the implementation behaved as expected, or numerical results that express runtime or energy measurements.
+
+\section{Correctness}
+
+There is not much to write about the correctness results for our program. Our
+program behaves as expected in that we can successfully input the Konami Code
+and observe a change of pattern in the LED lights. Further, from testing of our
+debounce system we have learned that some spurious inputs do get filtered by it.
+We claim this because spurious inputs were counted in test runs where the code
+was successfully accepted by the state machine.
+
+\section{Energy efficiency}
+
+We saw quite large energy savings as we took use of some of the energy saving
+features. Most importantly was getting from EM0 to EM2. At EM0 we read an
+average energy consumption of 3.6mA. Moving to EM1 got us to 1.44mA. While that
+is a significant difference, moving to EM2 is what really allowed us to cut down
+on energy consumption. Going to EM2 with the same functionality, we registered
+only about 2.5uA. After reaching EM2 we turned to disabling parts of the MCU
+that are not needed by our program and enabling optional features that could
+improve efficiency.
+
+Our first approach was to experiment with the system's clocks. In our final
+program we have two clocks active: the \emph{High Frequency RC Oscillator}
+(\textbf{HFRCO}) and the LFRCO discussed in chapter 3. We hypothesised that if
+we ran the core clock from the LFRCO as well and turned off the HFRCO, we could
+save energy by disabling the HFRCO. This turned out to be wrong, as energy usage
+jumped into the 100s of uA when we ran the core clock from LFRCO. We expect to
+be the case because the CPU takes longer to finish its work when interrupted and
+thus the MCU gets back to EM2 slower than when the CPU is operating at a higher
+frequency. We also tried to run LETIMER0 at a higher interrupt frequency while
+the core clock ran on the HFRCO. At 1024Hz the energy consumption measured
+around 20uA. It is clear to us that keeping the CPU in sleep mode as much as
+possible is essential.
+
+The remaining optimisations we have in the final program are powering down
+unused SRAM blocks and enabling zero wait-state reads from Flash. Additionally
+we also tried enabling instruction prefetching from Flash. We've measured a few
+combinations of these, with both an 8Hz and a 1024Hz LETIMER0. As powering down
+the SRAM blocks should guarantee some saving energy consumption, we've limited
+ourselves to testing with: no optimisations, SRAM powered down, SRAM powered
+down and instruction prefetching, and SRAM powered down and zero wait-state
+reads. Results can be found in tables \ref{tab:8Hz} and \ref{tab:1024Hz}.  
+\begin{table}
+\caption{8Hz}
+\centering
+\label{tab:8Hz}
+\begin{tabular}{l r}
+	No optimisations:&2.50uA\\
+	SRAM off:&1.74uA\\
+	SRAM off \& Prefetch:&1.73uA\\
+	SRAM off \& zero wait-state:&1.72uA\\
+	All optimisations:&1.73uA
+\end{tabular}
+\end{table}
+\begin{table}
+\caption{1024Hz}
+\centering
+\label{tab:1024Hz}
+\begin{tabular}{l r}
+	No optimisations:&21.1uA\\
+	SRAM off:&19.35uA\\
+	SRAM off \& Prefetch:&18.55uA\\
+	SRAM off \& zero wait-state:&18.55uA\\
+	All optimisations:&18.51uA
+\end{tabular}
+\end{table}
+
+We see that powering down SRAM improves energy efficiency considerably both at
+8Hz and 1024Hz. Prefetching and zero wait-state reads also give a noticable
+improvement at 1024Hz. At 8Hz they have a smaller impact. We feel this is
+logical, as at the higher timer frequency the CPU is awoken more often than at
+8Hz. It is then even more important to execute the exception handlers as quickly
+as possible to get back to EM2. Both prefetching instructions and reading faster
+from Flash helps the CPU work as quickly as it can. At 8Hz the time saved in the
+CPU is probably not as important since it isn't woken as frequently, and the
+prefetching might even take some energy that negates some of the gain from
+prefetching. Indeed, at 8Hz we observe a lower energy consumption while only
+using zero wait-state reads than while using both it and prefetching together.
+Based on this observation we decided to leave prefetching disabled in the final
+program.
+
+We've also observed that holding buttons on the controller down will increase
+the energy consumption by around 80uA per button. This could be a significant
+drain of energy for programs that base their operation around the user holding
+buttons pressed for a significant amount of time. Additionally, we have observed
+that the LED lights on the controller will use hundreds of mA combined while in
+use. It is of our opinion that this makes the energy efficieny of this program
+is quite insignificant. However, it is of course academically relevant, as we
+got to explore how the MCU by itself can be made to operate at different levels
+of energy efficiency depending on the requirements of its task.
