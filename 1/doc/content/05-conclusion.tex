@@ -1,5 +1,23 @@
 \chapter{Conclusion}
 % This chapter should be a look back at the entire report and summarizing the problem, the solution and the obtained results.
+This exercise was supposed to teach us how different functions worked,
+and how they could be implemented to satisfy a certain statement.
+
+What we did was write code in Assembly and compile it into machine code. That machine code was then flashed onto the flash memory of the microcontroller unit. This code would be used by the motherboard and react to certain events. The CPU could be put to sleep due to inactivity, or certain methods incurred due to activity.
+
+The main task we had was to create machine code, which could react to interactions with the buttons and provide a signal. This signal could be used to create methods or events that would happen if this signal was to occur. These methods or events would create appropriate outputs to the LED lights on the provided gamepad to show that the code produced was in a working and stable condition.
+
+We decided to get creative and made machine code which would use a timer and
+a clock to rotate the LED lights in a specified pattern. We also made a specific 
+sequence of inputs which would trigger the timer and the LED lights would then 
+no longer rotate, but rather that all LEDs would flip between an on state and
+an off state.
+
+What we discovered during this is that with alternative ways to do 
+the main task, we could get different values of energy consumption. These values 
+does not vary much and in a effiency way, it does not create a major difference. 
+However, this is, in an academic sense, still something worth noting as there is 
+more effiecent ways of completing certain tasks. 
 
 % \section{Evaluation of the Assignment}
 % You can include comments about the assignment itself here. While this part is not obligatory and not graded, it is valuable feedback to the course staff that can be used to improve the exercises in the future.
