@@ -146,4 +146,54 @@ end of {\tt konami\_code} we clear bits 15:8 of {\tt GPIO\_PA\_DOUT} to turn all
 the LEDs on. We then called this function from {\tt gpio\_handler} with the
 pressed button as argument.
 
+\subsection{Debounce}
+
+During implementation we discovered that the controller board was not a flawless
+piece of hardware engineering. The GPIO controller would frequently detect
+multiple falling edges per button press, causing our program to see spurious
+inputs. This was for obvious reasons not ideal for our code recognition program.
+In an attempt to make the controller input more reliable we came up with a
+method to debounce the signal in software. In our {\tt gpio\_handler} we
+recorded the value of {\tt tick} into a new variable {\tt last\_input} when we
+accepted input as genuine and on every invocation checked the current {\tt tick}
+to {\tt last\_tick}. If \({\tt tick} > {\tt last\_tick}\) we accepted the button
+press as genuine. As {\tt tick} increments at 8Hz this means that inputs
+registered within \(8^{-1} = 0.125\)s of a genuine input was dropped. Having
+this finer-grained tick counter is the reason we opted for an 8Hz timer
+interrupt rather than running it at 1Hz.
+
+\subsection{Energy optimisations}
+
+Our solution uses various techniques to use as little energy as possible. Most
+important is putting the CPU to sleep when not in use. This is done by issuing a
+a {\tt wfi} instruction in the main thread instead of looping forever. By
+default this will drop the MCU into EM1. However, the LETIMER0 is a low energy
+peripheral that is active also in EM2. For our program we can thus configure the
+\emph{Energy Management Unit} (\textbf{EMU}) to enter EM2 instead of EM1. We did
+this by setting the {\tt SLEEPDEEP} bit of {\tt SCR}, the \emph{System Control
+Register}. We also set the {\tt SLEEPONEXIT} bit to automatically go back to
+sleep after returning from an exception, rather than having the main thread wake
+up and looping into a new {\tt wfi}.
+
+Two smaller energy optimisations in the final program are turning off unused
+SRAM blocks and enabling zero wait-state reads from Flash. The unused SRAM
+blocks were powered down by writing {\tt BLK123} to {\tt EMU\_MEMCTRL}. Zero
+wait-state reads only work properly with a core clock below 16MHz. By default
+the core clock is 14MHz, but can according to the MCU documentation be unstable
+for a short period of time after reset. Therefore, before enabling the zero
+wait-state reads we wait for {\tt CMU\_STATUS[HFRCORDY]} to be sure that we are
+below 16MHz. Afterwards we set {\tt MSC\_READCTRL[MODE]} to 0 to enable zero
+wait-state reads.
+
 \section{Testing}
+
+We tested our program in two domains; correctness and power efficiency. Testing
+for correctness was mostly done with the GNU toolchain tool \emph{gdb}. Using
+gdb we could pause the program at will or at specific points in the code with
+breakpoints. We could also inspect and modify register- and memory values at
+runtime. gdb also let us step through our program one instruction at a time. To
+verify that our debouncer actually did something we wrote additional code that
+updated counts of genuine and spurious inputs. Testing power efficiency was done
+with the eAProfiler tool from the energyAware suite. It allowed us to easily log
+a few seconds of energy constumption data and gave us an average consumption of
+a time period.
