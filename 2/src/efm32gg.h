@@ -262,3 +262,5 @@ extern volatile struct efm32gg_msc     MSC;
 extern volatile struct efm32gg_dma     DMA;
 extern volatile struct efm32gg_emu     EMU;
 extern volatile struct efm32gg_cmu     CMU;
+
+extern volatile uint32_t ISER0;
