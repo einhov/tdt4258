@@ -1,13 +1,13 @@
 #include <stdint.h>
 #include "efm32gg.h"
-#include "gpio.h"
 #include "init.h"
-
-void init(void);
+#include "gpio.h"
+#include "letimer.h"
 
 void _start(void) {
 	init();
 	init_gpio();
+	init_timer0();
 
 	for(;;) {
 	}

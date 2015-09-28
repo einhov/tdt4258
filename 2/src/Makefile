@@ -13,7 +13,7 @@ LINKERSCRIPT=ex2.ld
 ex2.bin : ex2.elf
 	${OBJCOPY} -O binary $< $@
 
-ex2.elf : vector.o crt.o ex2.o init.o gpio.o
+ex2.elf : vector.o crt.o ex2.o init.o gpio.o letimer.o
 	${LD} -T ${LINKERSCRIPT} $^ -o $@ ${LDFLAGS} 
 
 %.o : %.c

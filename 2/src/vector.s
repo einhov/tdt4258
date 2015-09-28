@@ -43,7 +43,7 @@
 	.long dummy_handler
 	.long dummy_handler
 	.long dummy_handler
-	.long dummy_handler
+	.long letimer0_handler
 	.long dummy_handler
 	.long dummy_handler
 	.long dummy_handler
