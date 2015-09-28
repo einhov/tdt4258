@@ -18,7 +18,7 @@
 	.long dummy_handler           /* SysTick Handler              */
 
 	.long dummy_handler
-	.long dummy_handler            /* GPIO even handler */
+	.long gpio_handler            /* GPIO even handler */
 	.long dummy_handler
 	.long dummy_handler
 	.long dummy_handler
@@ -28,7 +28,7 @@
 	.long dummy_handler
 	.long dummy_handler
 	.long dummy_handler
-	.long dummy_handler            /* GPIO odd handler */
+	.long gpio_handler            /* GPIO odd handler */
 	.long dummy_handler
 	.long dummy_handler
 	.long dummy_handler
