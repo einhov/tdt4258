@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "efm32gg.h"
 #include "gpio.h"
+#include "init.h"
 
 void init(void);
 
