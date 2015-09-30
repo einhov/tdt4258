@@ -19,7 +19,7 @@ SECTIONS {
 
 	.rodata : ALIGN(8) {
 		*(.rodata*)
-		. = ALIGN(4);
+		. = ALIGN(8);
 		_etext = .;
 	} >rom
 
