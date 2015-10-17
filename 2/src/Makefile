@@ -3,10 +3,10 @@ LD=arm-none-eabi-gcc
 AS=arm-none-eabi-as
 OBJCOPY=arm-none-eabi-objcopy
 
-CFLAGS= -std=c99 -ffreestanding \
+CFLAGS= -std=gnu99 -ffreestanding \
 		-mthumb -march=armv7-m -mcpu=cortex-m3 \
-		-g -Wall -fno-eliminate-unused-debug-types -fno-eliminate-unused-debug-symbols -ggdb3
-LDFLAGS=-nostdlib -lgcc
+		-g -Wall -ggdb3
+LDFLAGS=-nostdlib -lm -lgcc
 ASFLAGS=-mthumb -march=armv7-m -mcpu=cortex-m3 -g
 LINKERSCRIPT=ex2.ld
 
