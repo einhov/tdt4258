@@ -15,7 +15,12 @@ void init_gpio(void) {
 }
 
 void __attribute__((interrupt)) gpio_handler(void) {
-	GPIO.PA.DOUT = rand();
+	enum ControllerInput in = GPIO.IF;
+	switch(in) {
+	default:
+		break;
+	}
+
 	GPIO.IFC = GPIO.IF;
 	return;
 }
