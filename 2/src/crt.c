@@ -1,6 +1,8 @@
 #include <stdint.h>
 #include <stddef.h>
 
+int __errno;
+
 void *memset(void *s, int c, size_t n) {
 	int i;
 	for(i = 0; i < n; i++)
@@ -23,4 +25,10 @@ uint32_t rand(void) {
 	static uint32_t x = 0;
 
 	return x = (a*x+c) % m;
+}
+
+float randf(void) {
+	uint32_t r = rand();
+	r = (r >> 8) | 0x3F800000;
+	return *(float*)&r - 1.0;
 }
