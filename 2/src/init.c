@@ -1,14 +1,12 @@
 #include <stdint.h>
 #include <stddef.h>
+#include "crt.h"
 
 extern char _sbss;
 extern char _ebss;
 extern char _sdata;
 extern char _edata;
 extern char _etext;
-
-void *memset(void *s, int c, size_t n);
-void *memcpy(void *dest, const void *src, size_t n);
 
 static void initialise_bss(void) {
 	memset(&_sbss, 0, &_ebss - &_sbss);
