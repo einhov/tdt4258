@@ -32,9 +32,9 @@ SECTIONS {
 	.bss ALIGN(8) :  {
 		_sbss = .;
 		*(.bss)
-		_ebss = .;
-		 bss_size = _ebss - _sbss;
+		bss_size = _ebss - _sbss;
 	} >ram
+	_ebss = ALIGN(.);
 }
 
 stack_top = ORIGIN(ram) + LENGTH(ram);
