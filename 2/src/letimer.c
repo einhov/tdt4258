@@ -1,8 +1,9 @@
+#include <stdint.h>
 #include "letimer.h"
 #include "efm32gg.h"
 #include "crt.h"
 
-static uint32_t tick;
+uint32_t tick;
 
 void init_timer0(void) {
 	CMU.OSCENCMD = (1<<6);
