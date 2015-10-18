@@ -4,8 +4,8 @@
 #include "crt.h"
 #include "waveforms.h"
 
-static const float PEAK_AMP = 255.0;
-static const float SAMPLE_RATE = 32768.0;
+static const uint32_t PEAK_AMP = 255;
+static const uint32_t SAMPLE_RATE = 32768;
 
 uint32_t saw_wave(struct saw_voice *v) {
 	uint32_t sample = v->phase;
@@ -18,8 +18,7 @@ uint32_t saw_wave(struct saw_voice *v) {
 
 uint32_t square_wave(struct square_voice *v) {
 	uint32_t sample = v->phase < PEAK_AMP / 2. ? PEAK_AMP : 0;
-	float freq = v->freq + (2. * randf() - 1.0);
-	v->phase += (PEAK_AMP / (SAMPLE_RATE / freq));
+	v->phase += (PEAK_AMP / (SAMPLE_RATE / v->freq));
 	if(v->phase > PEAK_AMP) {
 		v->phase -= PEAK_AMP;
 	}
@@ -38,14 +37,16 @@ uint32_t sine_wave(struct sine_voice *v) {
 uint32_t triangle_wave(struct triangle_voice *v) {
 	uint32_t sample = v->phase;
 	if(v->up) {
-		v->phase += (PEAK_AMP / (SAMPLE_RATE / v->freq)) * 2.0;
+		v->phase += (PEAK_AMP / (SAMPLE_RATE / v->freq)) * 2;
 		if(v->phase > PEAK_AMP)
 			v->up = !v->up;
 	} else {
-		v->phase -= (PEAK_AMP / (SAMPLE_RATE / v->freq)) * 2.0;
+		v->phase -= (PEAK_AMP / (SAMPLE_RATE / v->freq)) * 2;
 		if(v->phase < 0)
 			v->up = !v->up;
 	}
 
+	if(sample > PEAK_AMP) sample = PEAK_AMP;
+	else if(sample < 0) sample = 0;
 	return sample;
 }

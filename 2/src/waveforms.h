@@ -1,11 +1,11 @@
 struct saw_voice {
-	float phase;
-	float freq;
+	uint32_t phase;
+	uint32_t freq;
 };
 
 struct square_voice {
-	float phase;
-	int freq;
+	uint32_t phase;
+	uint32_t freq;
 };
 struct sine_voice {
 	float phase;
@@ -13,8 +13,8 @@ struct sine_voice {
 };
 
 struct triangle_voice {
-	float phase;
-	float freq;
+	int32_t phase;
+	uint32_t freq;
 	bool up;
 };
 
