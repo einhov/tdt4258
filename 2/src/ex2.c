@@ -18,13 +18,15 @@ struct triangle_voice triangle = { 0, 880 };
 
 uint32_t freqs[] = { 440, 880, 1760, 3520, 7040, 1760, 440, 7040 };
 
+uint32_t volume = 1;
+
 void dac_feeder(void) {
 	uint32_t sample = 0;
 	uint32_t len = sizeof(freqs) / sizeof(freqs[0]) - 0;
 	int a = (tick / 8192) % len;
 	triangle.freq = lerp(freqs[a], freqs[(a+1) % len], (tick % 8192) / 8192.0);
 	sample = triangle_wave(&triangle);
-	sample >>= 3;
+	sample >>= volume;
 	DAC0.CH0DATA = sample;
 	DAC0.CH1DATA = sample;
 }

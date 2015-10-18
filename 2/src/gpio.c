@@ -14,9 +14,19 @@ void init_gpio(void) {
 	ISER0 |= (1<<11 | 1<<1);
 }
 
+extern uint32_t volume;
+
 void __attribute__((interrupt)) gpio_handler(void) {
 	enum ControllerInput in = GPIO.IF;
 	switch(in) {
+	case CONTROLLER_RIGHT_UP:
+		if(volume > 0)
+			volume--;
+		break;
+	case CONTROLLER_RIGHT_DOWN:
+		if(volume < 5)
+			volume++;
+		break;
 	default:
 		break;
 	}
