@@ -10,10 +10,12 @@ LDFLAGS=-nostdlib -lm -lgcc
 ASFLAGS=-mthumb -march=armv7-m -mcpu=cortex-m3 -g
 LINKERSCRIPT=ex2.ld
 
+OBJECTS=vector.o crt.o ex2.o init.o gpio.o letimer.o waveforms.o
+
 ex2.bin : ex2.elf
 	${OBJCOPY} -O binary $< $@
 
-ex2.elf : vector.o crt.o ex2.o init.o gpio.o letimer.o waveforms.o
+ex2.elf : ${OBJECTS}
 	${LD} -T ${LINKERSCRIPT} $^ -o $@ ${LDFLAGS} 
 
 %.o : %.c
@@ -25,4 +27,4 @@ upload :
 
 .PHONY : clean
 clean :
-	-rm -rf *.o *.elf *.bin *.hex 
+	-rm -rf ${OBJECTS} ex2.elf ex2.bin
