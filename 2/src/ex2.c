@@ -8,10 +8,6 @@
 #include "crt.h"
 #include "waveforms.h"
 
-float lerp(double a, double b, double t) {
-	return a + t * (b - a);
-}
-
 struct saw_voice saw = { 0, 880 };
 struct square_voice square = { 0, 880 };
 struct triangle_voice triangle = { 0, 880 };

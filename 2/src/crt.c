@@ -32,3 +32,7 @@ float randf(void) {
 	r = (r >> 8) | 0x3F800000;
 	return *(float*)&r - 1.0;
 }
+
+float lerp(double a, double b, double t) {
+	return a + t * (b - a);
+}
