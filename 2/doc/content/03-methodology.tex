@@ -1,3 +1,100 @@
 \chapter{Methodology}
 
+\section{Implementation}
+
+\subsection{Overview}
+
+Our program plays a looping melody made by a frequency modulated generated
+square wave signal, while also playing up to four simultaneous sound samples
+when gamepad buttons are pressed. The functionality is spread over the following
+C source files.
+
+\begin{description}
+\item[ex2.c] \hfill \\
+	Glues all the logic together. Contains the reset handler and logic for
+	calculating audio samples for the DAC. The DAC is also set up here.
+\item[crt.c] \hfill \\
+	Useful utility functions.
+\item[init.c] \hfill \\
+	Initialisation code for the system.
+\item[gpio.c] \hfill \\
+	Initialisation code and interrupt handler for the gamepad. This file also
+	contains code to queue sound samples for playback.
+\item[letimer.c] \hfill \\
+	Initialisation code and interrupt handler for the LETIMER and LFRCO.
+\item[waveform.c] \hfill \\
+	Sound signal generators for sawtooth, square and triangle waveforms.
+\item[sound.c] \hfill \\
+	Code for playing back sound samples.
+\end{description}
+
+\subsection{Initialisation}
+Initialisation of the system is spread throughout many of the source files. All
+initialisation is done in the reset handler, \_start, located in ex2.c. The
+reset handler calls initialisation functions from other source files. First the
+.bss section of memory is cleared with 0 bytes and the .data section is copied
+from Flash storage to memory. The HFRCO clock is then increased to 28MHz by
+writing 5 to the band selection field of the CMU.HFRCOCTRL register. GPIO is
+initialised as in exercise 1; the GPIO peripheral is enabled, configured and its
+interrupt signals are unmasked in the NVIC. The DAC0 peripheral is then enabled
+and configured, enabling both channels of the DAC. Further the LETIMER is
+initialised, clocked by the LFRCO. The LFRCO is enabled by setting bit 6 of
+CMU.OSCENCMD and bit 7 of CMU.STATUS, which indicates that the LFRCO is ready,
+is read in a loop until it is set. Then Low Energy Peripherals are enabled by
+setting bit 4 of CMU.HFCORECLKEN0 and the LETIMER peripheral is enabled by
+setting bit 2 of CMU.LFACLKEN0. The LETIMER is configured to count down with a
+TOP value of 1, resulting in a \(\frac{32768}{2} = 16384\)Hz interrupt rate,
+enabled and unmasked in the NVIC. Finally, we turn off the three upper RAM
+blocks, configure the MCU for deep sleep mode and enter a wait for interrupt
+loop.
+
+\subsection{Waveforms}
+
+The waveforms program has code for generating sawtooth, square and triangle
+waveforms. Each waveform generation function takes a pointer to a voice
+structure for the waveform. The voice structures contain, at least, the current
+frequency and phase of the voice. The waveform generator calculates the correct
+sample based on this structure and updates the phase. In our final program we
+only use the square wave generator. Its output value is set to a constant
+PEAK\_AMP if the voice's phase is below \(\frac{PEAK\_AMP}{2}\) and zero
+otherwise. For every invocation the generator increments the phase by
+\(\frac{PEAK\_AMP \times frequency}{SAMPLE\_RATE}\), where \(frequency\) is the
+frequency of the voice and \(SAMPLE\_RATE\) is the constant sample rate of the
+signal, which in our case is the LETIMER interrupt rate. This means that, as
+long as the generator is called with the voice every timer tick, the voice will
+go through \(frequency\) periods every second and samples from the first half of
+each period will be PEAK\_AMP and the second half zero, resulting in a square
+wave of the intended frequency.
+
+\subsection{Playing music}
+
+\subsection{Sound samples}
+
+The sound samples our program plays are stored as raw 8-bit, 16384Hz, single
+channel, unsigned integer values. The source files in .wav format are converted
+to this raw format with the \emph{Sound eXchange} program (\textbf{SoX}). (Fig.
+\ref{Makefile:soundconvert}
+\begin{figure}[h]
+	\caption{Converting sounds to raw in Makefile}
+	\label{Makefile:soundconvert}
+	\begin{lstlisting}
+%.raw : %.wav
+	${SOX} $< -r 16384 -b 8 -c 1 -e unsigned-integer $@
+	\end{lstlisting}
+\end{figure}
+The raw files are further linked into object files with the linker ld. Invoking
+ld as shown in fig. \ref{Makefile:soundlink} creates an object file with the
+binary input stored in the .data section and defines symbols to the start of the
+data, end of the data and the size of the data.
+\begin{figure}[h]
+	\caption{Linking sounds in Makefile}
+	\label{Makefile:soundlink}
+	\begin{lstlisting}
+%.o : %.raw
+	${LD} -r -b binary $< -o $@
+	${OBJCOPY} --rename-section .data=.rodata,readonly,data,content $@ $@
+	\end{lstlisting}
+\end{figure}
+
+\subsection{Playing sounds}
 
