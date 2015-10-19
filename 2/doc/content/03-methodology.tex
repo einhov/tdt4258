@@ -66,8 +66,6 @@ go through \(frequency\) periods every second and samples from the first half of
 each period will be PEAK\_AMP and the second half zero, resulting in a square
 wave of the intended frequency.
 
-\subsection{Playing music}
-
 \subsection{Sound samples}
 
 The sound samples our program plays are stored as raw 8-bit, 16384Hz, single
@@ -95,6 +93,47 @@ data, end of the data and the size of the data.
 	${OBJCOPY} --rename-section .data=.rodata,readonly,data,content $@ $@
 	\end{lstlisting}
 \end{figure}
+Unfortunately, when ld is invoked like this the binary data is placed in the
+.data section of the object file by default. We want the data in the .rodata
+section so that it is stored on and read from the Flash memory. As also seen in
+fig. \ref{Makefile:soundlink}, we fix the object file by using objcopy to rename
+the .data section to .rodata. The symbols defined by the binary linking are
+formated as \emph{\_binary\_\textbf{filename}\_\textbf{extension}\_start} and
+similar for end and size. In the code these symbols are declared as extern const
+char arrays with the EXTERNBINARY (fig \ref{code:externbinary} macro.
+\begin{figure}[h]
+	\caption{EXTERNBINARY macro from sound.h}
+	\label{code:externbinary}
+	\begin{lstlisting}
+#define EXTERNBINARY(x,y)  \
+	extern const char _binary_##x##_##y##_start[]; \
+	extern const char _binary_##x##_##y##_end[]; \
+	\end{lstlisting}
+\end{figure}
 
-\subsection{Playing sounds}
+To play back the sounds a function play\_sound is used. As input it takes a
+pointer to a struct sound. The struct represents a particular playback of the
+sound sample. It contains the start and end positions of the audio, along with a
+counter storing where in the sound the playback currently is. The play\_sound
+function returns the next sample value and increments the position counter. If
+the position counter is at the end of the sound, the function will either,
+depending on a bool input, set the position back to 0, causing the sound to
+loop, or return 0.
 
+\subsection{Playing music and sounds}
+
+The function dac\_feeder in ex2.c is called from the LETIMER interrupt handler
+and is responsible for feeding the DAC and some general bookkeeping for sounds
+and music. The output sample value is calculated by accumulating samples from
+the various sources in a variable sample. After all sources have been added to
+the sample variable, its volume is scaled by right shifting the variable by
+another variable volume, before getting sent to the DAC by writing it to
+DAC0.CH0DATA and DAC0.CH1DATA.
+
+The music in our final program is a single square voice that constantly screams
+at varying frequencies. Notes are represented in a struct note which contains a
+start frequency and an end frequency. We store the end frequency so that we can
+interpolate between the frequencies to get a sliding note. The melody is stored
+as an array of these sound structs. The LETIMER interrupt handler increments a
+tick variable every time it fires. The dac\_feeder uses this variable to keep
+track of the position in the song.
