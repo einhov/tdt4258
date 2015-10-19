@@ -6,7 +6,7 @@ INCLUDE efm32gg.ld
 
 MEMORY {
 	rom (rx) : ORIGIN = 0x00000000, LENGTH = 1048576
-	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 131072
+	ram (rwx) : ORIGIN = 0x20000000, LENGTH = 32768
 }
 
 /* Use 8-byte alignment in case of dwords */

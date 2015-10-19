@@ -87,6 +87,7 @@ void _start(void) {
 	init_gpio();
 	init_dac();
 	init_timer0();
+	EMU.MEMCTRL = 7;
 
 	/* Sleep mode configuation */
 	SCR = 6;

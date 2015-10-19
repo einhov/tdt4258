@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stddef.h>
+#include "efm32gg.h"
 #include "crt.h"
 
 extern char _sbss;
