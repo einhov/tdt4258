@@ -74,7 +74,7 @@ void dac_feeder(void) {
 
 void init_dac(void) {
 	CMU.HFPERCLKEN0 |= (1<<17);
-	DAC0.CTRL &= ~(0b101 << 16);
+	DAC0.CTRL &= ~(0b111 << 16);
 	DAC0.CH0CTRL = 1;
 	DAC0.CH1CTRL = 1;
 }
