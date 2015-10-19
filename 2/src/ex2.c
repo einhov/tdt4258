@@ -29,25 +29,34 @@ void dac_feeder(void) {
 		}
 	}
 
+	const struct note *n = &song[(tick / 8192) % song_size].sfreq;
+	square.freq = lerp(n->sfreq, n->efreq, ((tick % 8192) / 8192.0));
+	sample += square_wave(&square) >> 3;
+
 	sample >>= volume;
 	DAC0.CH0DATA = sample;
 	DAC0.CH1DATA = sample;
 }
 
-void _start(void) {
-	init();
-	init_gpio();
-	init_timer0();
-
+void init_dac(void) {
 	CMU.HFPERCLKEN0 |= (1<<17);
 	DAC0.CTRL &= ~(0b111 << 16);
 	DAC0.CH0CTRL = 1;
 	DAC0.CH1CTRL = 1;
+}
 
-	extern void (*dac_feeder_ptr)(void);
-	dac_feeder_ptr = dac_feeder;
+void _start(void) {
+	init();
+	CMU.HFRCOCTRL &= ~(5<<8);
+	CMU.HFRCOCTRL |= 5<<8;
+	init_gpio();
+	init_dac();
+	init_timer0();
+
+	//SCR = 6;
 
 	for(;;) {
+		asm("wfi");
 	}
 }
 

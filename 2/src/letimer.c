@@ -17,12 +17,12 @@ void init_timer0(void) {
 	ISER0 |= (1<<26);
 }
 
-void (*dac_feeder_ptr)(void) = NULL;
-
 void __attribute__((interrupt)) letimer0_handler(void) {
+	extern void dac_feeder(void);
+
 	tick++;
 	if(tick % 8 == 0) GPIO.PA.DOUT = rand();
-	if(dac_feeder_ptr) dac_feeder_ptr();
+	dac_feeder();
 	LETIMER0.IFC = LETIMER0.IF;
 	return;
 }
