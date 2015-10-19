@@ -45,6 +45,13 @@ used for setting 8 LED lights on the controller board.
 
 \section{Software}
 
+We will be using the GNU Compiler Collection (GCC) to compile our C code into
+object files. These object files will be linked together by a linker script,
+which determines the position of all sections of the object files based on the
+memory setup. The object files will be linked in a specific object file, one
+which has no unresolved references. This file is, however, not finished in
+regard of putting it onto the flash memory of the MCU. \cite{TDT4528Compendium}
+
 As mentioned two sets of software were primarily used to develop the program for
 the dev kit. The GNU toolchain is a set of tools for building executable code
 from source code. The toolchain also provided a debugger that was used in
@@ -53,12 +60,7 @@ the program on the MCU. Other tools from the energyAware software suite was used
 to upload the program to the MCU's flash memory, and to read energy consumption
 information from the AEM. \cite{TDT4528Compendium}
 
-GNU Compiler Collection
-The compiler we will be using to 
-We will also be using a complex piece of software, GNU Compile Collection, which 
-would compile our current C programs into an object file. 
-
-\section{Sound Generator}
+\section{Digital to Analog Converter}
 
 In this excercise, we will use the Digital to Analog Converter (DAC) that is a
 part of the EFM32GG and is connected to an amplifier on the DK3750 development
@@ -95,5 +97,24 @@ We converted soundfiles to a digital value which could be read by the DAC. For
 this we used Sound eXchange (SoX), a cross-platform command line utility that
 converts various formats of computer audio files to other formats. \cite{SoX}
 
-\section{soundwaves}
+\section{Soundwaves}
 
+For this excercise, we created a sound wave synthesis which could be able to
+loop in the background. A soundwave is based upon the physical truth which
+determine that soundwaves is determined by the three properties frequency,
+period and amplitude. \cite{TDT4528Compendium}
+
+\begin{figure}[hb]
+  \centering
+  \includegraphics[height=3.5cm]{images/soundwave}
+  \caption[Soundwave]
+   {Soundwave. \cite{TDT4528Compendium}}
+\end{figure}
+
+The soundwaves are determined by the frequency of every period and the amount of
+samples in the same period. These things will determine how many samples per
+second. However, it is more commonly to have a pre-determined amount of samples
+per second and thereafter determine both the frequency and the period. The DAC
+will have a data register where each sample is being written in a continuous
+stream. One way of doing this is by setting up a timer that will push a new
+sample to the DAC every time it is interrupted. \cite{TDT4528Compendium}
