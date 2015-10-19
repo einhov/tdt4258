@@ -52,3 +52,48 @@ conjunction with a debugging server from the energyAware software suite to debug
 the program on the MCU. Other tools from the energyAware software suite was used
 to upload the program to the MCU's flash memory, and to read energy consumption
 information from the AEM. \cite{TDT4528Compendium}
+
+GNU Compiler Collection
+The compiler we will be using to 
+We will also be using a complex piece of software, GNU Compile Collection, which 
+would compile our current C programs into an object file. 
+
+\section{Sound Generator}
+
+In this excercise, we will use the Digital to Analog Converter (DAC) that is a
+part of the EFM32GG and is connected to an amplifier on the DK3750 development
+board. \cite{TDT4528Compendium} The DAC converts a digital value to an analog
+output voltage, using a limited amount of energy and thus maintaining a low
+energy consumption. Using DMA (Direct Memory Access) and a timer, the DAC should
+be able to generate waveforms without any CPU intervention. The DAC has two
+channels (Channel 0 and 1) with 12-bit data registers (DACn_CH0DATA and
+DACn_CH1DATA) which may be used to produce two independent outputs. The three
+conversion modes the DAC supports are continous, sample/hold and sample/off.
+Continous mode have the DAC channels drive their outputs continously, which
+maintain the output voltage and makes refresh not needed. Sample/hold mode is
+only active while the DAC core is triggered and is turned off otherwise.
+Therefore there may be needed for a refresh conversion if a certain period of
+time is passed. For the sample/off mode the DAC is off between samples, which
+requires the output voltage to be stored externally as the DAC is turned off
+after the conversion. The channels in the DAC have also a possibility of being
+either two single ended output or a differential output. In the single ended
+output scenario the channels (0 and 1) have their respective outputs in
+DACn_OUT0 and DACn_OUT1. In a scenario with a differential output the data used
+is from the 12-bit register used by channel 0 (DACn_CH0DATA) and the output is
+bipolar voltage with the positive output on DACn_OUT1 and the negative output on
+DACn_OUT0.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

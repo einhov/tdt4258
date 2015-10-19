@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/W32TeX) (preloaded format=pdflatex 2015.9.20)  19 OCT 2015 12:43
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/W32TeX) (preloaded format=pdflatex 2015.9.20)  19 OCT 2015 18:46
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -370,7 +370,7 @@ File: listings.cfg 2015/06/04 1.6 listings configuration
 ))
 Package: listings 2015/06/04 1.6 (Carsten Heinz)
  (./meta.tex)
-No file main.aux.
+(./main.aux)
 \openout1 = `main.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 23.
@@ -385,7 +385,7 @@ LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 23.
 LaTeX Font Info:    ... okay on input line 23.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 23.
 LaTeX Font Info:    ... okay on input line 23.
-(c:/texlive/2015/texmf-dist/tex/context/base/supp-pdf.mkii
+ (c:/texlive/2015/texmf-dist/tex/context/base/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count99
 \scratchdimen=\dimen109
@@ -495,69 +495,4 @@ Class scrreprt Warning: \float@addtolists detected!
 ]
 chapter 2.
 
-Package natbib Warning: Citation `DK3750Manual' on page 4 undefined on input li
-ne 6.
-
-
-Package natbib Warning: Citation `EFM32GGManual' on page 4 undefined on input l
-ine 19.
-
-
-Package natbib Warning: Citation `EFM32GGManual' on page 4 undefined on input l
-ine 27.
-
-
-Package natbib Warning: Citation `DK3750Manual' on page 4 undefined on input li
-ne 36.
-
-
-Package natbib Warning: Citation `DK3750Manual' on page 4 undefined on input li
-ne 41.
-
-[4
-
-]
-
-Package natbib Warning: Citation `TDT4528Compendium' on page 5 undefined on inp
-ut line 54.
-
-) (./content/03-methodology.tex [5]
-chapter 3.
-) (./content/04-results.tex [6
-
-]
-chapter 4.
-) (./content/05-conclusion.tex [7
-
-]
-chapter 5.
-)
-No file main.bbl.
-
-Package natbib Warning: There were undefined citations.
-
-[8
-
-] (./main.aux) ) 
-Here is how much of TeX's memory you used:
- 5053 strings out of 493091
- 76536 string characters out of 6138531
- 205859 words of memory out of 5000000
- 8474 multiletter control sequences out of 15000+600000
- 9727 words of font info for 34 fonts, out of 8000000 for 9000
- 1141 hyphenation exceptions out of 8191
- 47i,6n,66p,247b,224s stack positions out of 5000i,500n,10000p,200000b,80000s
-<c:/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx
-10.pfb><c:/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb><c
-:/texlive/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pfb><c:/texliv
-e/2015/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb><c:/texlive/2015/tex
-mf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb><c:/texlive/2015/texmf-dist/fo
-nts/type1/public/amsfonts/cm/cmssbx10.pfb><c:/texlive/2015/texmf-dist/fonts/typ
-e1/public/amsfonts/cm/cmti12.pfb>
-Output written on main.pdf (8 pages, 101165 bytes).
-PDF statistics:
- 67 PDF objects out of 1000 (max. 8388607)
- 46 compressed objects within 1 object stream
- 0 named destinations out of 1000 (max. 500000)
- 6 words of extra memory for PDF output out of 10000 (max. 10000000)
-
+Package natbib Warning: Cita
