@@ -9,14 +9,43 @@
 #include "waveforms.h"
 #include "sound.h"
 
-struct saw_voice saw = { 0, 880 };
-struct square_voice square = { 0, 880 };
-struct triangle_voice triangle = { 0, 880 };
+uint32_t volume = 4;
 struct sound sounds[4] = {};
+struct square_voice square = { 0, 440 };
 
-uint32_t freqs[] = { 440, 880, 1760, 3520, 7040, 1760, 440, 7040 };
+struct note {
+	uint32_t sfreq;
+	uint32_t efreq;
+};
 
-uint32_t volume = 1;
+static const struct note song[] = {
+	{ 80, 160 },
+	{ 80, 160 },
+	{ 80, 160 },
+	{ 80, 160 },
+
+	{ 80, 320 },
+	{ 160, 320 },
+	{ 160, 320 },
+	{ 160, 320 },
+
+	{ 80, 160 },
+	{ 80, 160 },
+	{ 80, 160 },
+	{ 80, 160 },
+
+	{ 80, 320 },
+	{ 160, 320 },
+	{ 160, 320 },
+	{ 160, 320 },
+
+	{ 160, 640 },
+	{ 320, 640 },
+	{ 320, 640 },
+	{ 320, 640 }
+};
+
+const uint32_t song_size = sizeof(song) / sizeof(song[0]);
 
 void dac_feeder(void) {
 	uint32_t sample = 0;
