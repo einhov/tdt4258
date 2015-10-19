@@ -25,15 +25,6 @@ uint32_t square_wave(struct square_voice *v) {
 	return sample;
 }
 
-uint32_t sine_wave(struct sine_voice *v) {
-	uint32_t sample = PEAK_AMP * ((sin(v->phase) / 2.0) + 0.5);
-	v->phase += (M_2_PI / (SAMPLE_RATE / v->freq));
-	if(v->phase >= M_2_PI) {
-		v->phase -= M_2_PI;
-	}
-	return sample;
-}
-
 uint32_t triangle_wave(struct triangle_voice *v) {
 	uint32_t sample = v->phase;
 	if(v->up) {

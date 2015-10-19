@@ -7,10 +7,6 @@ struct square_voice {
 	uint32_t phase;
 	uint32_t freq;
 };
-struct sine_voice {
-	float phase;
-	float freq;
-};
 
 struct triangle_voice {
 	int32_t phase;
@@ -20,5 +16,4 @@ struct triangle_voice {
 
 uint32_t saw_wave(struct saw_voice *v);
 uint32_t square_wave(struct square_voice *v);
-uint32_t sine_wave(struct sine_voice *v);
 uint32_t triangle_wave(struct triangle_voice *v);
