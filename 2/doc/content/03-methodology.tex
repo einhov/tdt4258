@@ -128,7 +128,9 @@ and music. The output sample value is calculated by accumulating samples from
 the various sources in a variable sample. After all sources have been added to
 the sample variable, its volume is scaled by right shifting the variable by
 another variable volume, before getting sent to the DAC by writing it to
-DAC0.CH0DATA and DAC0.CH1DATA.
+DAC0.CH0DATA and DAC0.CH1DATA. The volume variable is incremented and
+decremented in the GPIO interrupt handler on certain button presses, so that the
+overall volume of the program can be changed by the user.
 
 The music in our final program is a single square voice that constantly screams
 at varying frequencies. Notes are represented in a struct note which contains a
@@ -136,4 +138,26 @@ start frequency and an end frequency. We store the end frequency so that we can
 interpolate between the frequencies to get a sliding note. The melody is stored
 as an array of these sound structs. The LETIMER interrupt handler increments a
 tick variable every time it fires. The dac\_feeder uses this variable to keep
-track of the position in the song.
+track of the position in the song. It does this by calculating an index in the
+song array with the formula \( \frac{\texttt{tick}}{8192} \% \texttt{song\_size}
+\). The value \( 8192 \) is half the sample rate, or half the LETIMER interrupt
+rate, and each note is therefore half a second long. After finding the corrent
+note, the frequency of the square voice is set to a linear interpolation between
+the note's start and end frequency. After the frequency has been set, the square
+voice is calculated by a call to the square\_wave function and added to the
+sample accumulator.
+
+Code for playing sound samples on controller button presses is spread between
+the dac\_feeder in ex2.c and the GPIO interrupt handler in gpio.c. An array
+sounds of four sound structs is defined in ex2.c. In response to a button press
+on the controller, the GPIO interrupt handler checks the sounds array for a free
+spot. A free spot in the array is defined as an entry whose start data address
+is null. If a free spot is found, it will copy the values of a sound struct with
+data about the sound corresponding to the pressed button into the free spot and
+set its time value to zero. If no free space is found in the array, the input is
+ignored. Every LETIMER interrupt the dac\_feeder iterates through the sounds
+array and calls play\_sound on any active sounds, that is an entry in the array
+whose data start value is not null, it finds, adding the result to the sample
+accumulator. After playing a sound it checks whether the sound has finished, by
+comparing its counter value to the size of the sound. If the sound has finished
+its data start value is set to null, to free up the slot in the array.
