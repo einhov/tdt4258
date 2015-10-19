@@ -78,14 +78,13 @@ be able to generate waveforms without any CPU intervention. \cite{EFM32GGManual}
 
 The DAC has two channels (Channel 0 and 1) with 12-bit data registers
 (DACn\_CH0DATA and DACn\_CH1DATA) which may be used to produce two independent
-outputs. The three conversion modes the DAC supports are continous, sample/hold
-and sample/off. Continous mode have the DAC channels drive their outputs
+outputs. The three conversion modes the DAC supports are continuous, sample/hold
+and sample/off. Continuous mode have the DAC channels drive their outputs
 continously, which maintain the output voltage and makes refresh not needed.
 Sample/hold mode is only active while the DAC core is triggered and is turned
 off otherwise. Therefore there may be needed for a refresh conversion if a
-certain period of time is passed. For the sample/off mode the DAC is off between
-samples, which requires the output voltage to be stored externally as the DAC is
-turned off after the conversion. The channels in the DAC have also a possibility
+certain period of time has passed. For the sample/off mode the DAC is turned off between
+samples, which requires the output voltage to be stored externally. The channels in the DAC have also a possibility
 of being either two single ended output or a differential output. In the single
 ended output scenario the channels (0 and 1) have their respective outputs in
 DACn\_OUT0 and DACn\_OUT1. In a scenario with a differential output the data
@@ -100,8 +99,8 @@ converts various formats of computer audio files to other formats. \cite{SoX}
 \section{Soundwaves}
 
 For this excercise, we created a sound wave synthesis which could be able to
-loop in the background. A soundwave is based upon the physical truth which
-determine that soundwaves is determined by the three properties frequency,
+loop in the background. A soundwave is based upon physics which
+say that soundwaves is determined by the three properties: frequency,
 period and amplitude. \cite{TDT4528Compendium}
 
 \begin{figure}[hb]
@@ -118,3 +117,8 @@ per second and thereafter determine both the frequency and the period. The DAC
 will have a data register where each sample is being written in a continuous
 stream. One way of doing this is by setting up a timer that will push a new
 sample to the DAC every time it is interrupted. \cite{TDT4528Compendium}
+
+For this excercise, it should also be mentioned that with several different
+sounds it is possible to create a soundwave which is no longer a perfect sine
+curve. This may create different soundwaves and also different sounds all
+together. \cite{science_bitch}
