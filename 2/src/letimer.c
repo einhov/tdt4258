@@ -11,7 +11,7 @@ void init_timer0(void) {
 	CMU.HFCORECLKEN0 |= (1<<4);
 	CMU.LFACLKEN0 |= (1<<2);
 	LETIMER0.CTRL |= (1<<9);
-	LETIMER0.COMP0 = 0;
+	LETIMER0.COMP0 = 1;
 	LETIMER0.IEN = (1<<2);
 	LETIMER0.CMD = (1<<0);
 	ISER0 |= (1<<26);

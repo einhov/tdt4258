@@ -24,10 +24,10 @@ ex2.elf : ${OBJECTS} ${SOUNDS}
 	${CC} ${CFLAGS} -c $< -o $@
 
 %.raw : %.wav
-	${SOX} $< -r 32768 -b 8 -c 1 -e unsigned-integer $@
+	${SOX} $< -r 16384 -b 8 -c 1 -e unsigned-integer $@
 
 %.raw : %.ogg
-	${SOX} $< -r 32768 -b 8 -c 1 -e unsigned-integer $@
+	${SOX} $< -r 16384 -b 8 -c 1 -e unsigned-integer $@
 
 %.o : %.raw
 	${LD} -r -b binary $< -o $@
