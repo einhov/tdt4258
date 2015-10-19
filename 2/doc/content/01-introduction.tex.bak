@@ -1,12 +1,10 @@
-\documentclass[12pt]{report}
 
-\begin{document}
 
 \chapter{Introduction}
-In this report we will talk about making sound effects. Different button  
-\section{Introduction}
-\section{what to do}
 
-\end{document}
+In this report we will talk about and discuss how to make sound effects by interacting with different buttons using the C programming language. 
 
+For this exercise, we were supplied with a motherboard, a prototyping board and the GNU C Compiler; GCC with the corresponding documentation, explaining how C files could be linked with the gcc command.  We were also supplied with a custom gamepad and manuals for all of these parts. In addition to this, we got a thorough explanation on how to implement interrupts handling and other useful tips for HW timers in C. 
+
+The exercise specified that we should write a C program that runs directly on the development board without the support of an operating system and which plays different sound effects when different buttons are pressed. Three different sound effects should be made. In order to complete this exercise we needed to understand the the underlying fundamental principles and functions of the sound generator: Digital to Analog Converter (DAC), and studying sound wave synthesis. The EFM32GG reference manual provided was in good stead. 
 
