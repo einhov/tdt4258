@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 struct sound {
 	const char *data;
 	const char *end;

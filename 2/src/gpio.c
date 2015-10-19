@@ -1,6 +1,8 @@
+#include <stdbool.h>
 #include "gpio.h"
 #include "efm32gg.h"
 #include "crt.h"
+#include "sound.h"
 
 void init_gpio(void) {
 	CMU.HFPERCLKEN0 |= (1<<17 | 1<<13);
@@ -15,6 +17,29 @@ void init_gpio(void) {
 }
 
 extern uint32_t volume;
+extern struct sound sounds[4];
+
+EXTERNBINARY(sounds_wilhelm, raw);
+EXTERNBINARY(sounds_owl, raw);
+EXTERNBINARY(sounds_damnreality, raw);
+EXTERNBINARY(sounds_disappointed, raw);
+EXTERNBINARY(sounds_fail, raw);
+EXTERNBINARY(sounds_psycho, raw);
+static struct sound wilhelm = EXTERNSOUND(sounds_wilhelm);
+static struct sound owl = EXTERNSOUND(sounds_owl);
+static struct sound damnreality = EXTERNSOUND(sounds_damnreality);
+static struct sound disappointed = EXTERNSOUND(sounds_disappointed);
+static struct sound fail = EXTERNSOUND(sounds_fail);
+static struct sound psycho = EXTERNSOUND(sounds_psycho);
+
+static void insert_sound(struct sound *snd) {
+	for(int i = 0; i < sizeof(sounds) / sizeof(sounds[0]); i++)
+		if(sounds[i].data == 0) {
+			sounds[i] = *snd;
+			sounds[i].t = 0;
+			break;
+		}
+}
 
 void __attribute__((interrupt)) gpio_handler(void) {
 	enum ControllerInput in = GPIO.IF;
@@ -26,6 +51,24 @@ void __attribute__((interrupt)) gpio_handler(void) {
 	case CONTROLLER_RIGHT_DOWN:
 		if(volume < 5)
 			volume++;
+		break;
+	case CONTROLLER_LEFT_UP:
+		insert_sound(&owl);
+		break;
+	case CONTROLLER_LEFT_DOWN:
+		insert_sound(&wilhelm);
+		break;
+	case CONTROLLER_LEFT_LEFT:
+		insert_sound(&damnreality);
+		break;
+	case CONTROLLER_LEFT_RIGHT:
+		insert_sound(&disappointed);
+		break;
+	case CONTROLLER_RIGHT_LEFT:
+		insert_sound(&fail);
+		break;
+	case CONTROLLER_RIGHT_RIGHT:
+		insert_sound(&psycho);
 		break;
 	default:
 		break;

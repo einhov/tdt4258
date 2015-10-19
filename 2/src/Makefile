@@ -12,7 +12,7 @@ ASFLAGS=-mthumb -march=armv7-m -mcpu=cortex-m3 -g
 LINKERSCRIPT=ex2.ld
 
 OBJECTS=vector.o crt.o ex2.o init.o gpio.o letimer.o waveforms.o sound.o
-SOUNDS=sounds/wilhelm.o sounds/owl.o
+SOUNDS=sounds/wilhelm.o sounds/owl.o sounds/damnreality.o sounds/disappointed.o sounds/fail.o sounds/psycho.o
 
 ex2.bin : ex2.elf
 	${OBJCOPY} -O binary $< $@
