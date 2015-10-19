@@ -45,20 +45,20 @@ used for setting 8 LED lights on the controller board.
 
 \section{Software}
 
-We will be using the GNU Compiler Collection (GCC) to compile our C code into
-object files. These object files will be linked together by a linker script,
-which determines the position of all sections of the object files based on the
-memory setup. The object files will be linked in a specific object file, one
-which has no unresolved references. This file is, however, not finished in
-regard of putting it onto the flash memory of the MCU. \cite{TDT4528Compendium}
-
-As mentioned two sets of software were primarily used to develop the program for
-the dev kit. The GNU toolchain is a set of tools for building executable code
-from source code. The toolchain also provided a debugger that was used in
-conjunction with a debugging server from the energyAware software suite to debug
-the program on the MCU. Other tools from the energyAware software suite was used
-to upload the program to the MCU's flash memory, and to read energy consumption
-information from the AEM. \cite{TDT4528Compendium}
+The GNU toolchain is a set of tools for building executable code from source
+code. We will be using the GNU Compiler Collection (GCC) to compile our C code
+into object files. These object files will be linked together by a linker
+script, which determines the position of all sections of the object files based
+on the memory setup. The object files will be linked in a specific object file,
+one which has no unresolved references. This file is, however, not finished in
+regard of putting it onto the flash memory of the MCU. The last file-changing
+step is to generate a binary file with the input of the last specific object
+file, which can be done with objcopy tool. The toolchain also provided a
+debugger that was used in conjunction with a debugging server from the
+energyAware software suite to debug the program on the MCU. Other tools from the
+energyAware software suite was used to upload the program to the MCU's flash
+memory, and to read energy consumption information from the AEM.
+\cite{TDT4528Compendium}
 
 \section{Digital to Analog Converter}
 
