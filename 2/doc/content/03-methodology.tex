@@ -28,7 +28,21 @@ C source files.
 	Code for playing back sound samples.
 \end{description}
 
+\subsection{Register structures}
+
+To easily access the hardware registers on the EFM32GG we set up a number of
+struct definitions in efm32gg.h for the various register sets. We then declared
+the register sets we needed as external volatile struct variables and defined
+their addresses in the efm32gg.ld linker script included in our main linker
+script. This allowed us to easily access the hardware registers with proper
+type-checking from C. This method also gave us enhanced debugging functionality,
+as GDB understands C structures. For example, a \texttt{print GPIO} statement in
+the GDB console would print the values of all the registers of the GPIO
+peripheral. In this chapter we have used the struct member access syntax to
+refer to registers, for instance \texttt{CMU.HFPERCLKEN0}.
+
 \subsection{Initialisation}
+
 Initialisation of the system is spread throughout many of the source files. All
 initialisation is done in the reset handler, \_start, located in ex2.c. The
 reset handler calls initialisation functions from other source files. First the
