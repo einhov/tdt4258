@@ -5,6 +5,7 @@
 
 uint32_t tick;
 
+/* Enable letimer0. COMP0 = 1, thus the interrupt rate is 16384Hz */
 void init_timer0(void) {
 	CMU.OSCENCMD = (1<<6);
 	while((CMU.STATUS & (1<<7)) == 0);

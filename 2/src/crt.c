@@ -17,6 +17,7 @@ void *memcpy(void *dest, const void *src, size_t n) {
 	return dest;
 }
 
+/* Textbook LCG PRNG */
 uint32_t rand(void) {
 	const uint32_t a = 22695477;
 	const uint32_t c = 1;
@@ -27,12 +28,14 @@ uint32_t rand(void) {
 	return x = (a*x+c) % m;
 }
 
+/* Black magic. Returns a float in the range [0,1) */
 float randf(void) {
 	uint32_t r = rand();
 	r = (r >> 8) | 0x3F800000;
 	return *(float*)&r - 1.0;
 }
 
+/* Linear interpolation */
 float lerp(double a, double b, double t) {
 	return a + t * (b - a);
 }

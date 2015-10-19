@@ -47,9 +47,11 @@ static const struct note song[] = {
 
 const uint32_t song_size = sizeof(song) / sizeof(song[0]);
 
+/* The timer interrupt handler calls this function to feed the DAC */
 void dac_feeder(void) {
 	uint32_t sample = 0;
 
+	/* Add any sounds currently playing to the DAC sample */
 	for(int i = 0; i < sizeof(sounds) / sizeof(sounds[0]); i++) {
 		if(sounds[i].data != 0) {
 			sample += play_sound(&sounds[i], false) << 1;
@@ -58,11 +60,14 @@ void dac_feeder(void) {
 		}
 	}
 
+	/* Add the melody to the DAC sample */
 	const struct note *n = &song[(tick / 8192) % song_size].sfreq;
 	square.freq = lerp(n->sfreq, n->efreq, ((tick % 8192) / 8192.0));
 	sample += square_wave(&square) >> 3;
 
+	/* Scale the DAC sample with the volume variable */
 	sample >>= volume;
+
 	DAC0.CH0DATA = sample;
 	DAC0.CH1DATA = sample;
 }
@@ -76,13 +81,15 @@ void init_dac(void) {
 
 void _start(void) {
 	init();
+	/* Clock the HFRCO at 28MHz */
 	CMU.HFRCOCTRL &= ~(5<<8);
 	CMU.HFRCOCTRL |= 5<<8;
 	init_gpio();
 	init_dac();
 	init_timer0();
 
-	//SCR = 6;
+	/* Sleep mode configuation */
+	SCR = 6;
 
 	for(;;) {
 		asm("wfi");

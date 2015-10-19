@@ -4,6 +4,7 @@
 #include "crt.h"
 #include "sound.h"
 
+/* Enable GPIO and set up interrupts for gamepad buttons */
 void init_gpio(void) {
 	CMU.HFPERCLKEN0 |= (1<<17 | 1<<13);
 	GPIO.PA.CTRL = 2;
@@ -16,9 +17,12 @@ void init_gpio(void) {
 	ISER0 |= (1<<11 | 1<<1);
 }
 
+/* Extern globals from ex2.c. Overall volume and currently playing sounds. */
 extern uint32_t volume;
 extern struct sound sounds[4];
 
+/* Set up structs for the sounds. The symbols built by the macros are resolved
+ * to objects in the sounds/ directory. */
 EXTERNBINARY(sounds_wilhelm, raw);
 EXTERNBINARY(sounds_owl, raw);
 EXTERNBINARY(sounds_damnreality, raw);
@@ -32,6 +36,8 @@ static struct sound disappointed = EXTERNSOUND(sounds_disappointed);
 static struct sound fail = EXTERNSOUND(sounds_fail);
 static struct sound psycho = EXTERNSOUND(sounds_psycho);
 
+/* Looks for an open space in sounds[] and sets up snd to be played
+ * if a space is found. */
 static void insert_sound(struct sound *snd) {
 	for(int i = 0; i < sizeof(sounds) / sizeof(sounds[0]); i++)
 		if(sounds[i].data == 0) {
