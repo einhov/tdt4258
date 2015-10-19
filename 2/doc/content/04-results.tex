@@ -1,2 +1,58 @@
 \chapter{Results}
 
+\subsection{Correctness}
+
+Our program successfully plays a looping melody with its square wave generator,
+whilst also also playing back up to four sound samples simultaneously. It does
+not, however, achieve perfect results in performing this task. In our case the
+CPU needs to generate an output sample value for the DAC 16384 times per second.
+We initially operated with a sample rate of 32768Hz, but ran into severe issues
+getting stable waveform outputs. After some experimentation and debugging we
+released the CPU couldn't execute the LETIMER interrupt handler fast enough to
+finished before the next interrupt was fired. As a result we essentially
+operated at a lower sample rate when the CPU was overworked. This was especially
+noticable if the required time to finish the interrupt handler varied and passed
+the limit allowing for finishing in time, resulting in suddeny jumps in
+frequencies and speed of playback. In our final program we increased the core
+clock to 28MHz and lowered the sample rate to 16384Hz. This allowed us to play
+one square wave voice and four sound samples at the same time with minimal
+distortion. Some distortion can still be heard when playing four sound samples
+at once.
+
+The sliding of frequencies exposed serious aliasing issues in frequency
+selection for the waveform functions. The frequency of the waves will increase
+in steps instead of a smooth line, causing noticable jumps in sound pitch. We
+believe this is caused by the integer calculations we use to generate the
+soundwave samples. An attempt was made to combat the aliasing by employing
+floating point calculations to generate the samples, and results during testing
+showed decreased aliasing. Unfortunately the ARM Cortex-M3 CPU does not have
+hardware floating point support and the soft floating point implementation of
+libgcc could not produce code fast enough to be of any use for this exercise.
+We eventually decided to accept the frequency aliasing and it is quite noticable
+in the melody of our finished program.
+
+As in exercise 1, we also observed some issues with the controller input
+registering duplicate button presses when a single push is performed, resulting
+in two sound samples playing instead of one. As this isn't as critical in this
+program as in the one from exercise 1, we have not attempted to debounce the
+input this time.
+
+\subsection{Energy efficiency}
+
+Our final program in his exercise is pushing the CPU quite hard. We have
+therefore not been able to push on the energy saving aspect of the MCU as hard
+as in exercise 1. That said, we have taken some energy saving measures. Firstly,
+we turned off three unused SRAM blocks. This got us down to a power draw of 9mA
+from approximate 10mA. Further we configured the SCR for Deep Sleep mode and
+Sleep on Exit, and invoke the wait-for-interrupt instruction at the end of the
+reset handler. This got us down to 6mA while only playing the melody and a peak
+of around 8.6mA while playing four sounds and the melody.
+
+More could have been done to increase the energy efficiency. In our program the
+sample value for the DAC is calculated by the CPU on demand when the LETIMER
+interrupt is fired and fed by the CPU to the DAC register. An approach that
+would be likely to increase power efficiency is to render a number of samples
+into a buffer in memory before going into sleep and then letting the DMA device
+transfer data from the buffer into the DAC for playback. This would let the CPU
+work in bursts, require far less frequent interrupts and as a result go to sleep
+for longer periods of time.
