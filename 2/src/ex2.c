@@ -61,7 +61,7 @@ void dac_feeder(void) {
 	}
 
 	/* Add the melody to the DAC sample */
-	const struct note *n = &song[(tick / 8192) % song_size].sfreq;
+	const struct note *n = &song[(tick / 8192) % song_size];
 	square.freq = lerp(n->sfreq, n->efreq, ((tick % 8192) / 8192.0));
 	sample += square_wave(&square) >> 3;
 
