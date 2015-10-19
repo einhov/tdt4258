@@ -4,7 +4,7 @@
 
 \subsection{Overview}
 
-Our program plays a looping melody made by a frequency modulated generated
+Our program plays a looping melody made by a frequency modulated, generated
 square wave signal, while also playing up to four simultaneous sound samples
 when gamepad buttons are pressed. The functionality is spread over the following
 C source files.
@@ -73,11 +73,11 @@ channel, unsigned integer values. The source files in .wav format are converted
 to this raw format with the \emph{Sound eXchange} program (\textbf{SoX}). (Fig.
 \ref{Makefile:soundconvert}
 \begin{figure}[h]
-	\caption{Converting sounds to raw in Makefile}
 	\label{Makefile:soundconvert}
 	\begin{lstlisting}
 %.raw : %.wav
 	${SOX} $< -r 16384 -b 8 -c 1 -e unsigned-integer $@
+	\caption{Converting sounds to raw in Makefile}
 	\end{lstlisting}
 \end{figure}
 The raw files are further linked into object files with the linker ld. Invoking
@@ -85,12 +85,12 @@ ld as shown in fig. \ref{Makefile:soundlink} creates an object file with the
 binary input stored in the .data section and defines symbols to the start of the
 data, end of the data and the size of the data.
 \begin{figure}[h]
-	\caption{Linking sounds in Makefile}
 	\label{Makefile:soundlink}
 	\begin{lstlisting}
 %.o : %.raw
 	${LD} -r -b binary $< -o $@
 	${OBJCOPY} --rename-section .data=.rodata,readonly,data,content $@ $@
+	\caption{Linking sounds in Makefile}
 	\end{lstlisting}
 \end{figure}
 Unfortunately, when ld is invoked like this the binary data is placed in the
@@ -102,12 +102,12 @@ formated as \emph{\_binary\_\textbf{filename}\_\textbf{extension}\_start} and
 similar for end and size. In the code these symbols are declared as extern const
 char arrays with the EXTERNBINARY (fig \ref{code:externbinary} macro.
 \begin{figure}[h]
-	\caption{EXTERNBINARY macro from sound.h}
 	\label{code:externbinary}
 	\begin{lstlisting}
 #define EXTERNBINARY(x,y)  \
 	extern const char _binary_##x##_##y##_start[]; \
 	extern const char _binary_##x##_##y##_end[]; \
+	\caption{EXTERNBINARY macro from sound.h}
 	\end{lstlisting}
 \end{figure}
 
