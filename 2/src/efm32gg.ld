@@ -9,3 +9,4 @@ EMU      = 0x400C6000;
 CMU      = 0x400C8000;
 
 ISER0    = 0xe000e100;
+SCR      = 0xe000ed10;

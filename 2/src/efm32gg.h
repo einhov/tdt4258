@@ -264,3 +264,4 @@ extern volatile struct efm32gg_emu     EMU;
 extern volatile struct efm32gg_cmu     CMU;
 
 extern volatile uint32_t ISER0;
+extern volatile uint32_t SCR;
