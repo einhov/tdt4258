@@ -1,142 +1,255 @@
-#include <stdint.h>
+#include <linux/types.h>
 
-// GPIO
+struct efm32gg_adc {
+	uint32_t CTRL;
+	uint32_t CMD;
+	uint32_t STATUS;
+	uint32_t SINGLECTRL;
+	uint32_t SCANCTRL;
+	uint32_t IEN;
+	uint32_t IF;
+	uint32_t IFS;
+	uint32_t IFC;
+	uint32_t SINGLEDATA;
+	uint32_t SCANDATA;
+	uint32_t SINGLEDATAP;
+	uint32_t SCANDATAP;
+	uint32_t CAL;
+	uint32_t padding;
+	uint32_t BIASPROG;
+};
 
-#define GPIO_PA_BASE 0x40006000
-#define GPIO_PB_BASE 0x40006024
-#define GPIO_PC_BASE 0x40006048
+struct efm32gg_dac {
+	uint32_t CTRL;
+	uint32_t STATUS;
+	uint32_t CH0CTRL;
+	uint32_t CH1CTRL;
+	uint32_t IEN;
+	uint32_t IF;
+	uint32_t IFS;
+	uint32_t IFC;
+	uint32_t CH0DATA;
+	uint32_t CH1DATA;
+	uint32_t COMBDATA;
+	uint32_t CAL;
+	uint32_t BIASPROG;
+	uint32_t padding[8];
+	uint32_t OPACTRL;
+	uint32_t OPAOFFSET;
+	uint32_t OPA0MUX;
+	uint32_t OPA1MUX;
+	uint32_t OPA2MUX;
+};
 
-#define GPIO_PA_CTRL     ((volatile uint32_t*)(GPIO_PA_BASE + 0x00))
-#define GPIO_PA_MODEL    ((volatile uint32_t*)(GPIO_PA_BASE + 0x04))
-#define GPIO_PA_MODEH    ((volatile uint32_t*)(GPIO_PA_BASE + 0x08))
-#define GPIO_PA_DOUT     ((volatile uint32_t*)(GPIO_PA_BASE + 0x0c))
-#define GPIO_PA_DOUTSET  ((volatile uint32_t*)(GPIO_PA_BASE + 0x10))
-#define GPIO_PA_DOUTCLR  ((volatile uint32_t*)(GPIO_PA_BASE + 0x14))
-#define GPIO_PA_DOUTTGL  ((volatile uint32_t*)(GPIO_PA_BASE + 0x18))
-#define GPIO_PA_DIN      ((volatile uint32_t*)(GPIO_PA_BASE + 0x1c))
-#define GPIO_PA_PINLOCKN ((volatile uint32_t*)(GPIO_PA_BASE + 0x20))
+struct efm32gg_gpio_port {
+	uint32_t CTRL;
+	uint32_t MODEL;
+	uint32_t MODEH;
+	uint32_t DOUT;
+	uint32_t DOUTSET;
+	uint32_t DOUTCLR;
+	uint32_t DOUTTGL;
+	uint32_t DIN;
+	uint32_t PINLOCKN;
+};
 
-#define GPIO_PB_CTRL     ((volatile uint32_t*)(GPIO_PB_BASE + 0x00))
-#define GPIO_PB_MODEL    ((volatile uint32_t*)(GPIO_PB_BASE + 0x04))
-#define GPIO_PB_MODEH    ((volatile uint32_t*)(GPIO_PB_BASE + 0x08))
-#define GPIO_PB_DOUT     ((volatile uint32_t*)(GPIO_PB_BASE + 0x0c))
-#define GPIO_PB_DOUTSET  ((volatile uint32_t*)(GPIO_PB_BASE + 0x10))
-#define GPIO_PB_DOUTCLR  ((volatile uint32_t*)(GPIO_PB_BASE + 0x14))
-#define GPIO_PB_DOUTTGL  ((volatile uint32_t*)(GPIO_PB_BASE + 0x18))
-#define GPIO_PB_DIN      ((volatile uint32_t*)(GPIO_PB_BASE + 0x1c))
-#define GPIO_PB_PINLOCKN ((volatile uint32_t*)(GPIO_PB_BASE + 0x20))
+struct efm32gg_gpio {
+	struct efm32gg_gpio_port PA;
+	struct efm32gg_gpio_port PB;
+	struct efm32gg_gpio_port PC;
+	struct efm32gg_gpio_port PD;
+	struct efm32gg_gpio_port PE;
+	struct efm32gg_gpio_port PF;
+	uint32_t padding[10];
+	uint32_t EXTIPSELL;
+	uint32_t EXTIPSELH;
+	uint32_t EXTIRISE;
+	uint32_t EXTIFALL;
+	uint32_t IEN;
+	uint32_t IF;
+	uint32_t IFS;
+	uint32_t IFC;
+	uint32_t ROUTE;
+	uint32_t INSENSE;
+	uint32_t LOCK;
+	uint32_t CTRL;
+	uint32_t CMD;
+	uint32_t EM4WUEN;
+	uint32_t EM4WUPOL;
+	uint32_t EM4WUCAUSE;
+};
 
-#define GPIO_PC_CTRL     ((volatile uint32_t*)(GPIO_PC_BASE + 0x00))
-#define GPIO_PC_MODEL    ((volatile uint32_t*)(GPIO_PC_BASE + 0x04))
-#define GPIO_PC_MODEH    ((volatile uint32_t*)(GPIO_PC_BASE + 0x08))
-#define GPIO_PC_DOUT     ((volatile uint32_t*)(GPIO_PC_BASE + 0x0c))
-#define GPIO_PC_DOUTSET  ((volatile uint32_t*)(GPIO_PC_BASE + 0x10))
-#define GPIO_PC_DOUTCLR  ((volatile uint32_t*)(GPIO_PC_BASE + 0x14))
-#define GPIO_PC_DOUTTGL  ((volatile uint32_t*)(GPIO_PC_BASE + 0x18))
-#define GPIO_PC_DIN      ((volatile uint32_t*)(GPIO_PC_BASE + 0x1c))
-#define GPIO_PC_PINLOCKN ((volatile uint32_t*)(GPIO_PC_BASE + 0x20))
+struct efm32gg_letimer {
+	uint32_t CTRL;
+	uint32_t CMD;
+	uint32_t STATUS;
+	uint32_t CNT;
+	uint32_t COMP0;
+	uint32_t COMP1;
+	uint32_t REP0;
+	uint32_t REP1;
+	uint32_t IF;
+	uint32_t IFS;
+	uint32_t IFC;
+	uint32_t IEN;
+	uint32_t FREEZE;
+	uint32_t SYNCBUSY;
+	uint32_t padding[2];
+	uint32_t ROUTE;
+};
 
-#define GPIO_EXTIPSELL ((volatile uint32_t*)(GPIO_PA_BASE + 0x100))
-#define GPIO_EXTIPSELH ((volatile uint32_t*)(GPIO_PA_BASE + 0x104))
-#define GPIO_EXTIRISE  ((volatile uint32_t*)(GPIO_PA_BASE + 0x108))
-#define GPIO_EXTIFALL  ((volatile uint32_t*)(GPIO_PA_BASE + 0x10c))
-#define GPIO_IEN       ((volatile uint32_t*)(GPIO_PA_BASE + 0x110))
-#define GPIO_IFC       ((volatile uint32_t*)(GPIO_PA_BASE + 0x11c))
+struct efm32gg_lcd {
+	uint32_t CTRL;
+	uint32_t DISPCTRL;
+	uint32_t SEGEN;
+	uint32_t BACTRL;
+	uint32_t STATUS;
+	uint32_t AREGA;
+	uint32_t AREGB;
+	uint32_t IF;
+	uint32_t IFS;
+	uint32_t IFC;
+	uint32_t IEN;
+	uint32_t padding1[5];
+	uint32_t SEGD0L;
+	uint32_t SEGD1L;
+	uint32_t SEGD2L;
+	uint32_t SEGD3L;
+	uint32_t SEGD0H;
+	uint32_t SEGD1H;
+	uint32_t SEGD2H;
+	uint32_t SEGD3H;
+	uint32_t FREEZE;
+	uint32_t SYNCBUSY;
+	uint32_t padding2[19];
+	uint32_t SEGD4H;
+	uint32_t SEGD5H;
+	uint32_t SEGD6H;
+	uint32_t SEGD7H;
+	uint32_t padding3[2];
+	uint32_t SEGD4L;
+	uint32_t SEGD5L;
+	uint32_t SEGD6L;
+	uint32_t SEGD7L;
+};
 
-// CMU
+struct efm32gg_msc {
+	uint32_t CTRL;
+	uint32_t READCTRL;
+	uint32_t WRITECTRL;
+	uint32_t WRITECMD;
+	uint32_t ADDRB;
+	uint32_t padding1;
+	uint32_t WDATA;
+	uint32_t STATUS;
+	uint32_t padding2[4];
+	uint32_t IF;
+	uint32_t IFS;
+	uint32_t IFC;
+	uint32_t IEN;
+	uint32_t LOCK;
+	uint32_t CMD;
+	uint32_t CACHEHITS;
+	uint32_t CACHEMISSES;
+	uint32_t TIMEBASE;
+	uint32_t MASSLOCK;
+};
 
-#define CMU_BASE2 0x400c8000
+struct efm32gg_dma {
+	uint32_t STATUS;
+	uint32_t CONFIG;
+	uint32_t CTRLBASE;
+	uint32_t ALTCTRLBASE;
+	uint32_t CHWAITSTATUS;
+	uint32_t CHSWREQ;
+	uint32_t CHUSEBURSTS;
+	uint32_t CHUSEBURSTC;
+	uint32_t CHREQMASKS;
+	uint32_t CHREQMASKC;
+	uint32_t CHENS;
+	uint32_t CHENC;
+	uint32_t CHALTS;
+	uint32_t CHALTC;
+	uint32_t CHPRIS;
+	uint32_t CHPRIC;
+	uint32_t padding1[3];
+	uint32_t ERRORC;
+	uint32_t padding2[880];
+	uint32_t CHREQSTATUS;
+	uint32_t padding3[1];
+	uint32_t CHSREQSTATUS;
+	uint32_t padding4[121];
+	uint32_t IF;
+	uint32_t IFS;
+	uint32_t IFC;
+	uint32_t IEN;
+	uint32_t CTRL;
+	uint32_t RDS;
+	uint32_t padding5[2];
+	uint32_t LOOP0;
+	uint32_t LOOP1;
+	uint32_t padding6[14];
+	uint32_t RECT0;
+	uint32_t padding7[39];
+	uint32_t CHx_CTRL[12];
+};
 
-#define CMU_HFPERCLKDIV  ((volatile uint32_t*)(CMU_BASE2 + 0x008))
-#define CMU_HFCORECLKEN0 ((volatile uint32_t*)(CMU_BASE2 + 0x040))
-#define CMU_HFPERCLKEN0  ((volatile uint32_t*)(CMU_BASE2 + 0x044))
-#define CMU_CMD          ((volatile uint32_t*)(CMU_BASE2 + 0x024))
+struct efm32gg_emu {
+	uint32_t CTRL;
+	uint32_t MEMCTRL;
+	uint32_t LOCK;
+	uint32_t padding1[6];
+	uint32_t AUXCTRL;
+	uint32_t padding2;
+	uint32_t EM4CONF;
+	uint32_t BUCTRL;
+	uint32_t PWRCONF;
+	uint32_t BUINACT;
+	uint32_t BUACT;
+	uint32_t STATUS;
+	uint32_t ROUTE;
+	uint32_t IF;
+	uint32_t IFS;
+	uint32_t IFC;
+	uint32_t IEN;
+	uint32_t BUBODBUVINCAL;
+	uint32_t BUBODUNREGCAL;
+};
 
-#define CMU2_HFPERCLKEN0_DAC0   (1 << 17)
-#define CMU2_HFPERCLKEN0_PRS    (1 << 15)
-#define CMU2_HFPERCLKEN0_GPIO   (1 << 13)
-#define CMU2_HFPERCLKEN0_TIMER1 (1 << 6)
+struct efm32gg_cmu {
+	uint32_t CTRL;
+	uint32_t HFCORECLKDIV;
+	uint32_t HFPERCLKDIV;
+	uint32_t HFRCOCTRL;
+	uint32_t LFRCOCTRL;
+	uint32_t AUXHFRCOCTRL;
+	uint32_t CALCTRL;
+	uint32_t CALCNT;
+	uint32_t OSCENCMD;
+	uint32_t CMD;
+	uint32_t LFCLKSEL;
+	uint32_t STATUS;
+	uint32_t IF;
+	uint32_t IFS;
+	uint32_t IFC;
+	uint32_t IEN;
+	uint32_t HFCORECLKEN0;
+	uint32_t HFPERCLKEN0;
+	uint32_t padding1[2];
+	uint32_t SYNCBUSY;
+	uint32_t FREEZE;
+	uint32_t LFACLKEN0;
+	uint32_t padding2;
+	uint32_t LFBCLKEN0;
+	uint32_t padding3;
+	uint32_t LFAPRESC0;
+	uint32_t padding4;
+	uint32_t LFBPRESC0;
+	uint32_t padding5;
+	uint32_t PCNTCTRL;
+	uint32_t LCDCTRL;
+	uint32_t ROUTE;
+	uint32_t LOCK;
+};
 
-#define CMU_HFCORECLKEN0_DMA (1 << 0)
-
-// TIMER1
-
-#define TIMER1_BASE 0x40010400
-
-#define TIMER1_CMD ((volatile uint32_t*)(TIMER1_BASE + 0x04))
-#define TIMER1_IEN ((volatile uint32_t*)(TIMER1_BASE + 0x0c))
-#define TIMER1_IFC ((volatile uint32_t*)(TIMER1_BASE + 0x18))
-#define TIMER1_TOP ((volatile uint32_t*)(TIMER1_BASE + 0x1c))
-#define TIMER1_CNT ((volatile uint32_t*)(TIMER1_BASE + 0x24))
-
-// NVIC
-
-#define ISER0 ((volatile uint32_t*)0xe000e100)
-#define ISER1 ((volatile uint32_t*)0xe000e104)
-#define ICER0 ((volatile uint32_t*)0xe000e180)
-#define ICER1 ((volatile uint32_t*)0xe000e184)
-#define ISPR0 ((volatile uint32_t*)0xe000e200)
-#define ISPR1 ((volatile uint32_t*)0xe000e204)
-#define ICPR0 ((volatile uint32_t*)0xe000e280)
-#define ICPR1 ((volatile uint32_t*)0xe000e284)
-#define IABR0 ((volatile uint32_t*)0xe000e300)
-#define IABR1 ((volatile uint32_t*)0xe000e304)
-
-// IPR
-
-#define IPR_BASE  0xe000e400
-
-#define IPR0 ((volatile uint32_t*)(IPR_BASE + 0x00))
-#define IPR1 ((volatile uint32_t*)(IPR_BASE + 0x04))
-#define IPR2 ((volatile uint32_t*)(IPR_BASE + 0x08))
-#define IPR3 ((volatile uint32_t*)(IPR_BASE + 0x0c))
-
-// EMU
-
-#define EMU_BASE2 0x400c6000
-
-#define EMU_CTRL ((volatile uint32_t*)(EMU_BASE2 + 0x000))
-
-// DAC0
-
-#define DAC0_BASE2 0x40004000
-
-#define DAC0_CTRL     ((volatile uint32_t*)(DAC0_BASE2 + 0x000))
-#define DAC0_CH0CTRL  ((volatile uint32_t*)(DAC0_BASE2 + 0x008))
-#define DAC0_CH1CTRL  ((volatile uint32_t*)(DAC0_BASE2 + 0x00c))
-#define DAC0_IEN      ((volatile uint32_t*)(DAC0_BASE2 + 0x010))
-#define DAC0_IF       ((volatile uint32_t*)(DAC0_BASE2 + 0x014))
-#define DAC0_IFS      ((volatile uint32_t*)(DAC0_BASE2 + 0x018))
-#define DAC0_IFC      ((volatile uint32_t*)(DAC0_BASE2 + 0x01c))
-#define DAC0_CH0DATA  ((volatile uint32_t*)(DAC0_BASE2 + 0x020))
-#define DAC0_CH1DATA  ((volatile uint32_t*)(DAC0_BASE2 + 0x024))
-#define DAC0_COMBDATA ((volatile uint32_t*)(DAC0_BASE2 + 0x028))
-
-// DMA
-
-#define DMA_BASE 0x400c2000
-
-#define DMA_STATUS      ((volatile uint32_t*)(DMA_BASE + 0x0000))
-#define DMA_CONFIG      ((volatile uint32_t*)(DMA_BASE + 0x0004))
-#define DMA_CTRLBASE    ((volatile uint32_t*)(DMA_BASE + 0x0008))
-#define DMA_ALTCTRLBASE ((volatile uint32_t*)(DMA_BASE + 0x000c))
-#define DMA_CHUSEBURSTS ((volatile uint32_t*)(DMA_BASE + 0x0018))
-#define DMA_CHUSEBURSTC ((volatile uint32_t*)(DMA_BASE + 0x001c))
-#define DMA_REQMASKC    ((volatile uint32_t*)(DMA_BASE + 0x0024))
-#define DMA_CHENS       ((volatile uint32_t*)(DMA_BASE + 0x0028))
-#define DMA_CHALTC      ((volatile uint32_t*)(DMA_BASE + 0x0034))
-#define DMA_IFC         ((volatile uint32_t*)(DMA_BASE + 0x1008))
-#define DMA_IEN         ((volatile uint32_t*)(DMA_BASE + 0x100c))
-#define DMA_CH0_CTRL    ((volatile uint32_t*)(DMA_BASE + 0x1100))
-
-// PRS
-
-#define PRS_BASE 0x400cc000
-
-#define PRS_CH0_CTRL ((volatile uint32_t*)(PRS_BASE + 0x010))
-
-// System Control Block
-
-#define SCR          ((volatile uint32_t*)0xe000ed10)
-#define SYSTICK_CTRL ((volatile uint32_t*)0xe000e010)
-#define SYSTICK_LOAD ((volatile uint32_t*)0xe000e014)
+volatile struct efm32gg_gpio * const GPIO_PHYS = (void*)0x40006000;
