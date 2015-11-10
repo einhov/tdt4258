@@ -10,8 +10,11 @@
 #include <linux/cdev.h>
 #include <linux/device.h>
 #include <linux/interrupt.h>
+#include <linux/fcntl.h>
 #include <asm/uaccess.h>
 #include <asm/io.h>
+#include <asm/signal.h>
+#include <asm/siginfo.h>
 
 #include "efm32gg.h"
 
@@ -20,6 +23,11 @@ static struct cdev cdev;
 static struct class *cl;
 static volatile struct efm32gg_gpio *GPIO;
 static uint8_t status = 0;
+static struct fasync_struct *fasync_queue;
+
+static int gamepad_fasync(int fd, struct file *filp, int mode) {
+	return fasync_helper(fd, filp, mode, &fasync_queue);
+}
 
 static int gamepad_open(struct inode *node, struct file *filp)
 {
@@ -28,6 +36,7 @@ static int gamepad_open(struct inode *node, struct file *filp)
 
 static int gamepad_release(struct inode *node, struct file *filp)
 {
+	gamepad_fasync(-1, filp, 0);
 	return 0;
 }
 
@@ -48,11 +57,13 @@ static struct file_operations gamepad_fops = {
 	.open = gamepad_open,
 	.release = gamepad_release,
 	.read = gamepad_read,
-	.write = gamepad_write
+	.write = gamepad_write,
+	.fasync = gamepad_fasync
 };
 
-irqreturn_t gamepad_handler(int a, void* b) {
+irqreturn_t gamepad_handler(int irq, void *dev) {
 	status = ~ioread8(&GPIO->PC.DIN);
+	if(fasync_queue) kill_fasync(&fasync_queue, SIGIO, POLL_IN);
 	GPIO->IFC = GPIO->IF;
 	return IRQ_HANDLED;
 }
