@@ -17,8 +17,8 @@
 static dev_t dev;
 static struct cdev cdev;
 static struct class *cl;
-void *io_map;
-volatile struct efm32gg_gpio *GPIO;
+static void *io_map;
+static volatile struct efm32gg_gpio *GPIO;
 
 static int gamepad_open(struct inode *node, struct file *filp)
 {
