@@ -9,6 +9,7 @@
 #include <linux/fs.h>
 #include <linux/cdev.h>
 #include <linux/device.h>
+#include <linux/interrupt.h>
 #include <asm/uaccess.h>
 #include <asm/io.h>
 
@@ -18,6 +19,7 @@ static dev_t dev;
 static struct cdev cdev;
 static struct class *cl;
 static volatile struct efm32gg_gpio *GPIO;
+static uint8_t status = 0;
 
 static int gamepad_open(struct inode *node, struct file *filp)
 {
@@ -31,9 +33,8 @@ static int gamepad_release(struct inode *node, struct file *filp)
 
 static ssize_t gamepad_read(struct file *filp, char __user *buf, size_t count, loff_t *offp)
 {
-	uint8_t out = ~readl(&GPIO->PC.DIN) & 0xff;
 	if(count <= 0) return 0;
-	copy_to_user(buf, &out, 1);
+	copy_to_user(buf, &status, 1);
 	return 1;
 }
 
@@ -49,6 +50,12 @@ static struct file_operations gamepad_fops = {
 	.read = gamepad_read,
 	.write = gamepad_write
 };
+
+irqreturn_t gamepad_handler(int a, void* b) {
+	status = ~ioread8(&GPIO->PC.DIN);
+	GPIO->IFC = GPIO->IF;
+	return IRQ_HANDLED;
+}
 
 /*
  * gamepad_init - function to insert this module into kernel space
@@ -74,10 +81,15 @@ static int __init gamepad_init(void)
 	printk(KERN_INFO "ioremap: %08x\n", (unsigned int)GPIO_PHYS);
 
 	iowrite32(0x33333333, &GPIO->PC.MODEL);
-	iowrite8(0xff, &GPIO->PC.DOUT);
+	iowrite32(0xff, &GPIO->PC.DOUT);
 	iowrite32(0x22222222, &GPIO->EXTIPSELL);
 	iowrite32(0xff, &GPIO->EXTIFALL);
-	iowrite8(0xff, &GPIO->IEN);
+	iowrite32(0xff, &GPIO->EXTIRISE);
+	iowrite32(0xff, &GPIO->IEN);
+	iowrite32(0xff, &GPIO->IFC);
+
+	request_irq(17, gamepad_handler, 0, "gamepad", NULL);
+	request_irq(18, gamepad_handler, 0, "gamepad", NULL);
 
 	return 0;
 }
@@ -91,6 +103,8 @@ static int __init gamepad_init(void)
 
 static void __exit gamepad_cleanup(void)
 {
+	free_irq(17, NULL);
+	free_irq(18, NULL);
 	iounmap(GPIO);
 	unregister_chrdev_region(dev, 1);
 	device_destroy(cl, dev);
