@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <stdint.h>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -10,6 +11,7 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <sys/time.h>
+#include <unistd.h>
 
 #include <linux/fb.h>
 
@@ -17,6 +19,7 @@ extern char _binary_doge_raw_start[];
 extern char _binary_doge_raw_end[];
 
 int main(int argc, char *argv[]) {
+	int controller = open("/dev/gamepad", O_RDONLY);
 	struct fb_copyarea rect;
 	rect.dx = 0;
 	rect.dy = 0;
@@ -36,14 +39,13 @@ int main(int argc, char *argv[]) {
 	}
 
 	for(;;) {
-		struct timeval start, end, delta;
-		gettimeofday(&start, NULL);
 		memcpy(fb, _binary_doge_raw_start, _binary_doge_raw_end - _binary_doge_raw_start);
 		ioctl(fbd, 0x4680, &rect);
-		gettimeofday(&end, NULL);
-		timersub(&start, &end, &delta);
-		printf("Time: %f\n", delta.tv_usec / 1000.0);
+		uint8_t c;
+		read(controller, &c, 1);
+		printf("%02x\n", c);
 	}
 
+	close(controller);
 	exit(EXIT_SUCCESS);
 }
