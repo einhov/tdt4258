@@ -118,6 +118,7 @@ static void __exit gamepad_cleanup(void)
 	free_irq(18, NULL);
 	iounmap(GPIO);
 	unregister_chrdev_region(dev, 1);
+	release_mem_region((unsigned long)GPIO_PHYS, sizeof(*GPIO));
 	device_destroy(cl, dev);
 	cdev_del(&cdev);
 	class_destroy(cl);
