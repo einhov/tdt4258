@@ -93,8 +93,10 @@ static int __init gamepad_init(void)
 static void __exit gamepad_cleanup(void)
 {
 	iounmap(GPIO);
-	cdev_del(&cdev);
 	unregister_chrdev_region(dev, 1);
+	device_destroy(cl, dev);
+	cdev_del(&cdev);
+	class_destroy(cl);
 }
 
 module_init(gamepad_init);
