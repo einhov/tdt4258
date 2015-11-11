@@ -3,6 +3,11 @@
 
 #include <stdint.h>
 
+static const int FRAMEBUFFER_WIDTH = 320;
+static const int FRAMEBUFFER_HEIGHT = 240;
+static const int FRAMEBUFFER_DEPTH = 2;
+static const int FRAMEBUFFER_SIZE = 320 * 240 * 2;
+
 struct framebuffer {
 	int fd;
 	uint16_t *buf;

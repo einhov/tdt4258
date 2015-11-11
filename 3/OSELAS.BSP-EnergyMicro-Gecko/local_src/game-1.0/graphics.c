@@ -15,7 +15,7 @@ void clear(struct framebuffer *fb, int x, int y, int width, int height) {
 
 	int i;
 	for(i = 0; i < height; i++)
-		memset(&fb->buf[(i + y) * 320 + x], 0, width * 2);
+		memset(&fb->buf[(i + y) * FRAMEBUFFER_WIDTH + x], 0, width * 2);
 	ioctl(fb->fd, 0x4680, &rect);
 }
 
@@ -28,7 +28,7 @@ void draw_image(struct framebuffer *fb, const struct image *img, int x, int y) {
 
 	int i;
 	for(i = 0; i < img->height; i++) {
-		memcpy( &fb->buf[(i + y) * 320 + x],
+		memcpy( &fb->buf[(i + y) * FRAMEBUFFER_WIDTH + x],
 				&img->buf[i * img->width],
 				img->width * 2);
 	}
@@ -41,20 +41,20 @@ void draw_cursor(struct framebuffer *fb, int x, int y) {
 	int i;
 	for(i = 0; i < 40; i++) {
 		/* Top */
-		fb->buf[(y * 40 + 0) * 320 + x * 40 + i] = COLOUR;
-		fb->buf[(y * 40 + 1) * 320 + x * 40 + i] = COLOUR;
+		fb->buf[(y * 40 + 0) * FRAMEBUFFER_WIDTH + x * 40 + i] = COLOUR;
+		fb->buf[(y * 40 + 1) * FRAMEBUFFER_WIDTH + x * 40 + i] = COLOUR;
 
 		/* Bottom */
-		fb->buf[((y+1) * 40 - 1) * 320 + x * 40 + i] = COLOUR;
-		fb->buf[((y+1) * 40 - 2) * 320 + x * 40 + i] = COLOUR;
+		fb->buf[((y+1) * 40 - 1) * FRAMEBUFFER_WIDTH + x * 40 + i] = COLOUR;
+		fb->buf[((y+1) * 40 - 2) * FRAMEBUFFER_WIDTH + x * 40 + i] = COLOUR;
 
 		/* Left */
-		fb->buf[(y * 40 + i) * 320 + x * 40 + 0] = COLOUR;
-		fb->buf[(y * 40 + i) * 320 + x * 40 + 1] = COLOUR;
+		fb->buf[(y * 40 + i) * FRAMEBUFFER_WIDTH + x * 40 + 0] = COLOUR;
+		fb->buf[(y * 40 + i) * FRAMEBUFFER_WIDTH + x * 40 + 1] = COLOUR;
 
 		/* Right */
-		fb->buf[(y * 40 + i) * 320 + (x+1) * 40 - 1] = COLOUR;
-		fb->buf[(y * 40 + i) * 320 + (x+1) * 40 - 2] = COLOUR;
+		fb->buf[(y * 40 + i) * FRAMEBUFFER_WIDTH + (x+1) * 40 - 1] = COLOUR;
+		fb->buf[(y * 40 + i) * FRAMEBUFFER_WIDTH + (x+1) * 40 - 2] = COLOUR;
 	}
 
 	struct fb_copyarea rect;
