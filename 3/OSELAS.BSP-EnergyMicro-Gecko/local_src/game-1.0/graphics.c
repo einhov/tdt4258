@@ -1,10 +1,25 @@
 #include <stdint.h>
 #include <string.h>
 
+#include <fcntl.h>
+#include <unistd.h>
 #include <sys/ioctl.h>
+#include <sys/mman.h>
 #include <linux/fb.h>
 
 #include "graphics.h"
+
+int framebuffer_init(struct framebuffer *fb) {
+	fb->fd = open("/dev/fb0", O_RDWR);
+	if(fb->fd == -1) return -1;
+	fb->buf = mmap(NULL, FRAMEBUFFER_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fb->fd, 0);
+	if(fb->buf == MAP_FAILED) return -2;
+	return 0;
+}
+
+void framebuffer_clean(struct framebuffer *fb) {
+	close(fb->fd);
+}
 
 void clear(struct framebuffer *fb, int x, int y, int width, int height) {
 	struct fb_copyarea rect;
