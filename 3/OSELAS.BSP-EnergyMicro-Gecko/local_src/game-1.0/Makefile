@@ -12,7 +12,7 @@ LDFLAGS +=
 
 all: game
 
-game : game.o doge.o
+game : game.o graphics.o
 	${CC} $^ -o $@ ${LDFLAGS}
 
 clean:
