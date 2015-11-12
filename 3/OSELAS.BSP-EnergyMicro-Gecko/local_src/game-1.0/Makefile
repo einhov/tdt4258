@@ -15,7 +15,7 @@ DOGES = 1.o 2.o 3.o 4.o 5.o 6.o
 
 all: game
 
-game : game.o graphics.o ${DOGES}
+game : game.o graphics.o puzzle.o ${DOGES}
 	${CC} $^ -o $@ ${LDFLAGS}
 
 %.o : %.raw
