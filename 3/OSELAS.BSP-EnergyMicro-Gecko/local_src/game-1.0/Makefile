@@ -6,8 +6,8 @@
 # add more flags here,
 # but don't remove the "+="
 #
-CFLAGS += -O2 -g -Wall #-Wsign-compare -Wfloat-equal -Wformat-security #-Werror
 OBJCOPY=arm-cortexm3-uclinuxeabi-objcopy
+CFLAGS += -std=gnu99 -O2 -g -Wall #-Wsign-compare -Wfloat-equal -Wformat-security #-Werror
 CPPFLAGS +=
 LDFLAGS +=
 
