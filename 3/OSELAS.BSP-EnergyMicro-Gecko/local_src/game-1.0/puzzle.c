@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <stdbool.h>
+#include <stdio.h>
 
 #include "puzzle.h"
 
@@ -8,11 +10,12 @@ extern char _binary_3_raw_start[];
 extern char _binary_4_raw_start[];
 extern char _binary_5_raw_start[];
 extern char _binary_6_raw_start[];
+extern char _binary_flipped_raw_start[];
 
 #define DOGE_TILE(name) \
 	{ .buf = (uint16_t*)_binary_##name##_raw_start, .width = 40, .height = 40 }
 
-struct image doges[] = {
+static const struct image doges[] = {
 	DOGE_TILE(1),
 	DOGE_TILE(2),
 	DOGE_TILE(3),
@@ -21,31 +24,79 @@ struct image doges[] = {
 	DOGE_TILE(6)
 };
 
-static void draw_full_board(struct puzzle *p) {
-	int i, j;
-	for(i = 0; i < 6; i++)
-		for(j = 0; j < 8; j++)
-			draw_image(p->fb, &doges[p->board[i * 6 + j]], 80 + j * 40, i * 40);
-}
+static const struct image flipped = DOGE_TILE(flipped);
 
-static void refresh_tile(struct puzzle *p, int x, int y) {
+static void draw_tile(const struct puzzle *p, int x, int y) {
 	draw_image(p->fb, &doges[p->board[y * 6 + x]], 80 + x * 40, y * 40);
 }
 
-void puzzle_init(struct puzzle *p, struct framebuffer *fb) {
-	p->fb = fb;
-	p->cursor_x = 0;
-	p->cursor_y = 0;
+static void draw_flipped_tile(const struct puzzle *p, int x, int y) {
+	draw_image(p->fb, &flipped, 80 + x * 40, y * 40);
+}
 
-	for(int i = 0; i < 6 * 6; i++) {
-		p->board[i] = rand() % 6;
+static void refresh_tile(const struct puzzle *p, int x, int y) {
+	if(p->solved[y * 6 + x] == true)
+		draw_tile(p, x, y);
+	else if(p->state != PUZZLE_STATE_NONE && (
+		(p->choice1_x == x && p->choice1_y == y) ||
+		(p->choice2_x == x && p->choice2_y == y)))
+		draw_tile(p, x, y);
+
+	else
+		draw_flipped_tile(p, x, y);
+}
+
+static void draw_full_board(const struct puzzle *p) {
+	int i, j;
+	for(i = 0; i < 6; i++)
+		for(j = 0; j < 6; j++)
+				refresh_tile(p, i, j);
 	}
+
+	void puzzle_init(struct puzzle *p, struct framebuffer *fb) {
+		p->fb = fb;
+		p->cursor_x = 0;
+		p->cursor_y = 0;
+
+		for(int i = 0; i < 6 * 6; i++) {
+			p->board[i] = rand() % 6;
+			p->solved[i] = false;
+		}
+
+	p->choice1_x = -1;
+	p->choice1_y = -1;
+	p->choice2_x = -1;
+	p->choice2_y = -1;
+	p->remaining = (6 * 6) / 2;
+	p->state = PUZZLE_STATE_NONE;
 
 	clear(p->fb, 0, 0, 320, 240);
 	draw_full_board(p);
 }
 
+static int do_move(struct puzzle *p, int x1, int y1, int x2, int y2) {
+	if(p->board[y1 * 6 + x1] == p->board[y2 * 6 + x2]) {
+		printf("Setting (%d, %d) and (%d, %d) solved\n", x1, y1, x2, y2);
+		p->solved[y1 * 6 + x1] = true;
+		p->solved[y2 * 6 + x2] = true;
+		p->remaining--;
+	}
+	return p->remaining;
+}
+
 int puzzle_input(struct puzzle *p, int input) {
+	if(input == 0) return p->remaining;
+
+	if(p->state == PUZZLE_STATE_TWO) {
+		p->state = PUZZLE_STATE_NONE;
+		refresh_tile(p, p->choice1_x, p->choice1_y);
+		refresh_tile(p, p->choice2_x, p->choice2_y);
+		p->choice1_x = -1;
+		p->choice1_y = -1;
+		p->choice2_x = -1;
+		p->choice2_y = -1;
+	}
+
 	int old_x = p->cursor_x;
 	int old_y = p->cursor_y;
 
@@ -58,12 +109,40 @@ int puzzle_input(struct puzzle *p, int input) {
 	if(p->cursor_x > 5) p->cursor_x = 5;
 	if(p->cursor_y > 5) p->cursor_y = 5;
 
+	if(input & 16) {
+		if(p->state == PUZZLE_STATE_NONE) {
+			if(!p->solved[p->cursor_y * 6 + p->cursor_x]) {
+				p->choice1_x = p->cursor_x;
+				p->choice1_y = p->cursor_y;
+				p->state = PUZZLE_STATE_ONE;
+				printf("Choice 1: (%d,%d)\n", p->cursor_x, p->cursor_y);
+			}
+		} else if(p->state == PUZZLE_STATE_ONE) {
+			if( ((p->choice1_x != p->cursor_x) || (p->choice1_y != p->cursor_y)) &&
+				(!p->solved[p->cursor_y * 6 + p->cursor_x])) {
+				p->choice2_x = p->cursor_x;
+				p->choice2_y = p->cursor_y;
+
+				do_move(p,
+						p->choice1_x, p->choice1_y,
+						p->choice2_x, p->choice2_y);
+
+				p->state = PUZZLE_STATE_TWO;
+				printf("Choice 2: (%d,%d)\n", p->cursor_x, p->cursor_y);
+			}
+		}
+
+		refresh_tile(p, p->cursor_x, p->cursor_y);
+		draw_cursor(p->fb, p->cursor_x + 2, p->cursor_y);
+	}
+
 	if(p->cursor_x == old_x && p->cursor_y == old_y) return 0;
 
 	// Redraw over old cursor
+	printf("Refresh STATE: %d (%d,%d) (%d,%d)\n", p->state, p->choice1_x, p->choice1_y, p->choice2_x, p->choice2_y);
 	refresh_tile(p, old_x, old_y);
 
 	// Draw new cursor
 	draw_cursor(p->fb, p->cursor_x + 2, p->cursor_y);
-	return 0;
+	return p->remaining;
 }

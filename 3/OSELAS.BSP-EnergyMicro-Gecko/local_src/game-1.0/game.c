@@ -1,5 +1,5 @@
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <stdint.h>
 #include <string.h>
@@ -11,6 +11,12 @@
 #include "graphics.h"
 #include "puzzle.h"
 
+enum game_state {
+	GAME_STATE_INTRO,
+	GAME_STATE_INGAME,
+	GAME_STATE_VICTORY
+};
+
 int controller = 0;
 struct framebuffer fb;
 struct puzzle p;
@@ -18,7 +24,7 @@ struct puzzle p;
 void gamepad_handler(int signal) {
 	uint8_t c;
 	read(controller, &c, 1);
-	puzzle_input(&p, c);
+	int rem = puzzle_input(&p, c);
 }
 
 int main(int argc, char *argv[]) {
@@ -38,7 +44,7 @@ int main(int argc, char *argv[]) {
 
 	puzzle_init(&p, &fb);
 
-	for(;;);
+	for(;;) sleep(10);
 
 	close(controller);
 	exit(EXIT_SUCCESS);
