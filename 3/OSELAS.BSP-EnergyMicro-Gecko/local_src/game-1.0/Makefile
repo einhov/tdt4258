@@ -7,19 +7,25 @@
 # but don't remove the "+="
 #
 CFLAGS += -O2 -g -Wall #-Wsign-compare -Wfloat-equal -Wformat-security #-Werror
+OBJCOPY=arm-cortexm3-uclinuxeabi-objcopy
 CPPFLAGS +=
 LDFLAGS +=
 
+DOGES = 1.o 2.o 3.o 4.o 5.o 6.o
+
 all: game
 
-game : game.o graphics.o
+game : game.o graphics.o ${DOGES}
 	${CC} $^ -o $@ ${LDFLAGS}
 
+%.o : %.raw
+	${LD} -r -b binary $^ -o $@
+	${OBJCOPY} --rename-section .data=.rodata,readonly,data,content $@ $@
+
 clean:
-	-rm -f game
+	-rm -f game *.o
 
 install:
-
 
 .PHONY: all install clean
 
