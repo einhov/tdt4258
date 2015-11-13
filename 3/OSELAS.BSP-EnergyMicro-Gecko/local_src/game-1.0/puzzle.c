@@ -4,24 +4,20 @@
 
 #include "puzzle.h"
 
-extern char _binary_1_raw_start[];
-extern char _binary_2_raw_start[];
-extern char _binary_3_raw_start[];
-extern char _binary_4_raw_start[];
-extern char _binary_5_raw_start[];
-extern char _binary_6_raw_start[];
-extern char _binary_flipped_raw_start[];
+#define RAW(name) extern char _binary_##name##_raw_start[]
+
+RAW(1); RAW(2); RAW(3); RAW(4); RAW(5); RAW(6); RAW(7); RAW(8); RAW(9); RAW(10);
+RAW(11); RAW(12); RAW(13); RAW(14); RAW(15); RAW(16); RAW(17); RAW(18); RAW(flipped);
 
 #define DOGE_TILE(name) \
 	{ .buf = (uint16_t*)_binary_##name##_raw_start, .width = 40, .height = 40 }
 
 static const struct image doges[] = {
-	DOGE_TILE(1),
-	DOGE_TILE(2),
-	DOGE_TILE(3),
-	DOGE_TILE(4),
-	DOGE_TILE(5),
-	DOGE_TILE(6)
+	DOGE_TILE(1), DOGE_TILE(2), DOGE_TILE(3), DOGE_TILE(4),
+	DOGE_TILE(5), DOGE_TILE(6), DOGE_TILE(7), DOGE_TILE(8),
+	DOGE_TILE(9), DOGE_TILE(10), DOGE_TILE(11), DOGE_TILE(12),
+	DOGE_TILE(13), DOGE_TILE(14), DOGE_TILE(15), DOGE_TILE(16),
+	DOGE_TILE(17), DOGE_TILE(18)
 };
 
 static const struct image flipped = DOGE_TILE(flipped);
@@ -59,7 +55,7 @@ static void draw_full_board(const struct puzzle *p) {
 		p->cursor_y = 0;
 
 		for(int i = 0; i < 6 * 6; i++) {
-			p->board[i] = rand() % 6;
+			p->board[i] = rand() % 18;
 			p->solved[i] = false;
 		}
 
