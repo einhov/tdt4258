@@ -46,18 +46,30 @@ static void draw_full_board(const struct puzzle *p) {
 	int i, j;
 	for(i = 0; i < 6; i++)
 		for(j = 0; j < 6; j++)
-				refresh_tile(p, i, j);
+			refresh_tile(p, i, j);
+}
+
+static void xchg(int *a, int *b) {
+	*a ^= *b;
+	*b ^= *a;
+}
+
+void puzzle_init(struct puzzle *p, struct framebuffer *fb) {
+	p->fb = fb;
+	p->cursor_x = 0;
+	p->cursor_y = 0;
+
+	for(int i = 0; i < 6 * 6; i++) {
+		p->board[i] = i % 6 * 6;
+		p->solved[i] = false;
 	}
 
-	void puzzle_init(struct puzzle *p, struct framebuffer *fb) {
-		p->fb = fb;
-		p->cursor_x = 0;
-		p->cursor_y = 0;
+	// Modified Fisher-Yates shuffle
+	for(int i = 36 - 1; i >= 1; i--) {
+		int j = rand() % (i + 1);
+		xchg(&p->board[i], &p->board[j]);
+	}
 
-		for(int i = 0; i < 6 * 6; i++) {
-			p->board[i] = rand() % 18;
-			p->solved[i] = false;
-		}
 
 	p->choice1_x = -1;
 	p->choice1_y = -1;
