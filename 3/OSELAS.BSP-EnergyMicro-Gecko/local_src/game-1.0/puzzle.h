@@ -12,18 +12,19 @@ enum puzzle_state {
 	PUZZLE_STATE_WON
 };
 
+struct puzzle_coord {
+	int x, y;
+};
+
 struct puzzle {
 	struct framebuffer *fb;
 	int board[6 * 6];
 	bool solved[6 * 6];
 
-	int cursor_x;
-	int cursor_y;
+	struct puzzle_coord cursor;
 
-	int choice1_x;
-	int choice1_y;
-	int choice2_x;
-	int choice2_y;
+	struct puzzle_coord choice1;
+	struct puzzle_coord choice2;
 
 	int remaining;
 
