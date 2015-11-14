@@ -5,9 +5,9 @@
 
 #include "graphics.h"
 
-static const PUZZLE_WIDTH = 6;
-static const PUZZLE_HEIGHT = 6;
-static const PUZZLE_SIZE = 6 * 6;
+static const int PUZZLE_WIDTH = 6;
+static const int PUZZLE_HEIGHT = 6;
+static const int PUZZLE_SIZE = 6 * 6;
 
 enum puzzle_state {
 	PUZZLE_STATE_NONE,
