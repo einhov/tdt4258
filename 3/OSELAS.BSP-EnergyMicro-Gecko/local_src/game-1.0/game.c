@@ -10,6 +10,7 @@
 
 #include "graphics.h"
 #include "puzzle.h"
+#include "victory.h"
 
 enum game_state {
 	GAME_STATE_INTRO,
@@ -20,12 +21,29 @@ enum game_state {
 int controller = 0;
 struct framebuffer fb;
 struct puzzle p;
+struct victory_scene v;
+enum game_state state = GAME_STATE_INGAME;
 
 void gamepad_handler(int signal) {
 	uint8_t c;
 	read(controller, &c, 1);
-	int rem = puzzle_input(&p, c);
-}
+	switch(state) {
+		case GAME_STATE_INTRO:
+			state = GAME_STATE_INGAME;
+		case GAME_STATE_INGAME:
+			if(puzzle_input(&p, c) <= 17) {
+				victory_scene_init(&v, &fb);
+				state = GAME_STATE_VICTORY;
+			}
+			break;
+		case GAME_STATE_VICTORY:
+			if(victory_scene_input(&v)) {
+				puzzle_init(&p, &fb);
+				state = GAME_STATE_INGAME;
+			}
+			break;
+	}
+};
 
 int main(int argc, char *argv[]) {
 	struct sigaction act;
@@ -43,7 +61,17 @@ int main(int argc, char *argv[]) {
 
 	puzzle_init(&p, &fb);
 
-	for(;;) sleep(10);
+	for(;;) {
+		switch(state) {
+			case GAME_STATE_INGAME:
+				sleep(10);
+				break;
+			case GAME_STATE_VICTORY:
+				if(!victory_scene_frame(&v)) usleep(50);
+				else sleep(10);
+				break;
+		}
+	}
 
 	close(controller);
 	exit(EXIT_SUCCESS);
