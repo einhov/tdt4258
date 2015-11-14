@@ -34,7 +34,6 @@ int main(int argc, char *argv[]) {
 	act.sa_flags = SA_SIGINFO;
 	sigaction(SIGIO, &act, NULL);
 	controller = open("/dev/gamepad", O_RDONLY);
-	signal(SIGIO, &gamepad_handler);
 	fcntl(controller, F_SETOWN, getpid());
 	int oflags = fcntl(controller, F_GETFL);
 	fcntl(controller, F_SETFL, oflags | FASYNC);
