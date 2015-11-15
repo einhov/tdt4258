@@ -9,6 +9,7 @@
 #include <signal.h>
 
 #include "graphics.h"
+#include "intro.h"
 #include "puzzle.h"
 #include "victory.h"
 
@@ -20,16 +21,21 @@ enum game_state {
 
 int controller = 0;
 struct framebuffer fb;
+struct intro_scene i;
 struct puzzle p;
 struct victory_scene v;
-enum game_state state = GAME_STATE_INGAME;
+enum game_state state = GAME_STATE_INTRO;
 
 void gamepad_handler(int signal) {
 	uint8_t c;
 	read(controller, &c, 1);
 	switch(state) {
 		case GAME_STATE_INTRO:
-			state = GAME_STATE_INGAME;
+			if(intro_scene_input(&i)) {
+				puzzle_init(&p, &fb);
+				state = GAME_STATE_INGAME;
+			}
+			break;
 		case GAME_STATE_INGAME:
 			if(puzzle_input(&p, c) <= 17) {
 				victory_scene_init(&v, &fb);
@@ -38,12 +44,13 @@ void gamepad_handler(int signal) {
 			break;
 		case GAME_STATE_VICTORY:
 			if(victory_scene_input(&v)) {
-				puzzle_init(&p, &fb);
 				state = GAME_STATE_INGAME;
+				usleep(10000);
+				puzzle_init(&p, &fb);
 			}
 			break;
 	}
-};
+}
 
 int main(int argc, char *argv[]) {
 	struct sigaction act;
@@ -59,10 +66,30 @@ int main(int argc, char *argv[]) {
 	int err = framebuffer_init(&fb);
 	assert(err == 0);
 
-	puzzle_init(&p, &fb);
+	if(argc >= 2) {
+		int start_state = strtol(argv[1], NULL, 10);
+		if(start_state == 1) state = GAME_STATE_INTRO;
+		else if(start_state == 2) state = GAME_STATE_INGAME;
+		else if(start_state == 3) state = GAME_STATE_VICTORY;
+	}
+
+	switch(state) {
+		case GAME_STATE_INTRO:
+			intro_scene_init(&i, &fb);
+			break;
+		case GAME_STATE_INGAME:
+			puzzle_init(&p, &fb);
+			break;
+		case GAME_STATE_VICTORY:
+			victory_scene_init(&v, &fb);
+			break;
+	}
 
 	for(;;) {
 		switch(state) {
+			case GAME_STATE_INTRO:
+				usleep(intro_scene_frame(&i));
+				break;
 			case GAME_STATE_INGAME:
 				sleep(10);
 				break;

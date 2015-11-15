@@ -50,6 +50,33 @@ void draw_image(struct framebuffer *fb, const struct image *img, int x, int y) {
 	ioctl(fb->fd, 0x4680, &rect);
 }
 
+void draw_image_line_horizontal(struct framebuffer *fb, const struct image *img, int x, int y, int line) {
+	struct fb_copyarea rect;
+	rect.dx = x;
+	rect.dy = y + line;
+	rect.width = img->width;
+	rect.height = 1;
+
+	memcpy( &fb->buf[(line + y) * FRAMEBUFFER_WIDTH + x],
+			&img->buf[line * img->width],
+			img->width * 2);
+	ioctl(fb->fd, 0x4680, &rect);
+}
+
+void draw_image_line_vertical(struct framebuffer *fb, const struct image *img, int x, int y, int line) {
+	struct fb_copyarea rect;
+	rect.dx = x + line;
+	rect.dy = y;
+	rect.width = 1;
+	rect.height = img->height;
+
+	int i;
+	for(i = 0; i < img->height; i++) {
+		fb->buf[(i + y) * FRAMEBUFFER_WIDTH + x + line] = img->buf[i * img->width + line];
+	}
+	ioctl(fb->fd, 0x4680, &rect);
+}
+
 void draw_cursor(struct framebuffer *fb, int x, int y) {
 	const uint16_t COLOUR = 0b1111100000011111;
 

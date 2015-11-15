@@ -23,6 +23,8 @@ int framebuffer_init(struct framebuffer *fb);
 void framebuffer_clean(struct framebuffer *fb);
 void clear(struct framebuffer *fb, int x, int y, int width, int height);
 void draw_image(struct framebuffer *fb, const struct image *img, int x, int y);
+void draw_image_line_horizontal(struct framebuffer *fb, const struct image *img, int x, int y, int line);
+void draw_image_line_vertical(struct framebuffer *fb, const struct image *img, int x, int y, int line);
 void draw_cursor(struct framebuffer *fb, int x, int y);
 void blit(struct framebuffer *fb, const struct image *img, uint16_t alpha, int x, int y);
 
