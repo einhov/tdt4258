@@ -128,7 +128,6 @@ int puzzle_input(struct puzzle *p, int input) {
 				p->choice1.x = p->cursor.x;
 				p->choice1.y = p->cursor.y;
 				p->state = PUZZLE_STATE_ONE;
-				printf("Choice 1: (%d,%d)\n", p->cursor.x, p->cursor.y);
 			}
 		} else if(p->state == PUZZLE_STATE_ONE) {
 			if(((p->choice1.x != p->cursor.x) || (p->choice1.y != p->cursor.y)) &&
@@ -139,7 +138,6 @@ int puzzle_input(struct puzzle *p, int input) {
 				do_move(p, p->choice1, p->choice2);
 
 				p->state = PUZZLE_STATE_TWO;
-				printf("Choice 2: (%d,%d)\n", p->cursor.x, p->cursor.y);
 			}
 		}
 
@@ -150,7 +148,6 @@ int puzzle_input(struct puzzle *p, int input) {
 	if(p->cursor.x == old_x && p->cursor.y == old_y) return p->remaining;
 
 	// Redraw over old cursor
-	printf("Refresh STATE: %d (%d,%d) (%d,%d)\n", p->state, p->choice1.x, p->choice1.y, p->choice2.x, p->choice2.y);
 	refresh_tile(p, (struct puzzle_coord) { old_x, old_y });
 
 	// Draw new cursor
