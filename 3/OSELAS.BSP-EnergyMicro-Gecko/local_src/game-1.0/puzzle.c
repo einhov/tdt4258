@@ -85,6 +85,7 @@ void puzzle_init(struct puzzle *p, struct framebuffer *fb) {
 	clear(p->fb, 0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
 	draw_image(p->fb, &sidebar, 0, 0);
 	draw_full_board(p);
+	draw_cursor(p->fb, p->cursor.x + 2, p->cursor.y);
 }
 
 static int do_move(struct puzzle *p, struct puzzle_coord t1, struct puzzle_coord t2) {
