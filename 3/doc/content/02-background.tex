@@ -1,1 +1,58 @@
 \chapter{Background and Theory}
+
+\section{Linux and \textmu Clinux}
+
+In exercise 1 and 2 we programmed the development board in an unmanaged
+environment, also referred to as \emph{on bare metal}. While coding on bare
+metal makes it simple to quickly get code running and gives direct access to
+hardware, it also puts the burden of resource management and hardware
+configuration on the application programmer. The programmer must make sure to
+either initialise the hardware and keep track of resources inside the
+application, or to link with and call existing code that performs these tasks.
+For many applications the power gained from having direct access to the hardware
+is likely to be unnecessary, the required code would be similar boilerplate
+replicated in multiple applications and potentially prone for bugs, and the
+application programmer must expend mental effort that could have gone towards
+development of the application itself. The resulting application would also be
+specialised to run on the specific platform it initially targetted and
+supporting additional platforms would rapidly increase the complexity of its
+complexity. An alternative to programming on bare metal is to develop
+applications for a managed system that does hardware initialisation and
+configuration, and manages resources for the the application programmer. Such a
+system is called an \emph{Operating System} (\textbf{OS}).
+
+For this exercise the application was developped to run on an OS based on the
+\emph{Linux kernel}. The Linux kernel is an \emph{UNIX-like} kernel, which means
+that its interfaces to user applications mimic ones from a family of OSes known
+as \emph{UNIX}. Of relevance to this exercise is that, due to Linux' UNIX-like
+nature, it closely follows the \emph{POSIX standard}, which gives us a formally
+defined API to code for. We will get back to POSIX and introduce the \emph{C
+Standard Library} in the next section. The Linux kernel is often paired with a
+set of applications, such as a shell and base tools to operate the system, and a
+C library to form a complete OS. On desktop PCs, software from the GNU
+collection is normally used. On embedded systems, such as in our exercise, the
+software in the GNU collection is usually unsuitable due to its size and
+performance footprint. The system we programmed for is instead using the
+\emph{BusyBox} utilities and \emph{\textmu Clibc} library, which we will get
+back to shortly.
+
+The standard Linux kernel is designed to run on processors with a \emph{Memory
+Management Unit} (\textbf{MMU}). The MMU is a unit of a CPU responsible for
+translating and validating memory accesses. With an MMU a system can, amongst
+other functionalities, map \emph{virtual memory addresses} to \emph{physical
+memory addresses}, allowing programs to address memory independently of its
+physical location, or perform access control to memory based on a program's
+priveleges. As the EFM32GG microcontroller on the EFM32GG-DK3750 development
+board we are using for the exercise does not have an MMU, we are using a port of
+Linux called \textmu Clinux, which is a port of the Linux kernel patched to
+function on microcontrollers lacking MMUs.
+
+\section{C Standard Library and POSIX}
+
+\section{BusyBox}
+
+\section{ptxdist}
+
+\section{Framebuffer}
+
+\section{Device Drivers}
