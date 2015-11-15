@@ -55,8 +55,7 @@ void gamepad_handler(int signal) {
 int main(int argc, char *argv[]) {
 	struct sigaction act;
 	memset(&act, 0, sizeof(act));
-	act.sa_sigaction = &gamepad_handler;
-	act.sa_flags = SA_SIGINFO;
+	act.sa_handler = &gamepad_handler;
 	sigaction(SIGIO, &act, NULL);
 	controller = open("/dev/gamepad", O_RDONLY);
 	fcntl(controller, F_SETOWN, getpid());
