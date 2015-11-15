@@ -11,7 +11,7 @@ CFLAGS += -std=gnu99 -O2 -g -Wall #-Wsign-compare -Wfloat-equal -Wformat-securit
 CPPFLAGS +=
 LDFLAGS += -lm
 
-IMAGES = 1.o 2.o 3.o 4.o 5.o 6.o 7.o 8.o 9.o 10.o 11.o 12.o 13.o 14.o 15.o 16.o 17.o 18.o flipped.o doge.o balloons.o
+IMAGES = 1.o 2.o 3.o 4.o 5.o 6.o 7.o 8.o 9.o 10.o 11.o 12.o 13.o 14.o 15.o 16.o 17.o 18.o flipped.o doge.o balloons.o sidebar.o
 
 all: game
 

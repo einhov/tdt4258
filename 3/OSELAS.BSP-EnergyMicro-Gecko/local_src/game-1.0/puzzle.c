@@ -7,7 +7,8 @@
 #define RAW(name) extern char _binary_##name##_raw_start[]
 
 RAW(1); RAW(2); RAW(3); RAW(4); RAW(5); RAW(6); RAW(7); RAW(8); RAW(9); RAW(10);
-RAW(11); RAW(12); RAW(13); RAW(14); RAW(15); RAW(16); RAW(17); RAW(18); RAW(flipped);
+RAW(11); RAW(12); RAW(13); RAW(14); RAW(15); RAW(16); RAW(17); RAW(18);
+RAW(flipped); RAW(sidebar);
 
 #define DOGE_TILE(name) \
 	{ .buf = (uint16_t*)_binary_##name##_raw_start, .width = 40, .height = 40 }
@@ -21,6 +22,8 @@ static const struct image doges[] = {
 };
 
 static const struct image flipped = DOGE_TILE(flipped);
+static const struct image sidebar =
+	{ .buf = (uint16_t*)_binary_sidebar_raw_start, .width = 80, .height = 240 };
 
 static void draw_tile(const struct puzzle *p, const struct puzzle_coord coord) {
 	draw_image(p->fb,
@@ -80,6 +83,7 @@ void puzzle_init(struct puzzle *p, struct framebuffer *fb) {
 	p->state = PUZZLE_STATE_NONE;
 
 	clear(p->fb, 0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+	draw_image(p->fb, &sidebar, 0, 0);
 	draw_full_board(p);
 }
 
