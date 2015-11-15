@@ -80,3 +80,22 @@ void draw_cursor(struct framebuffer *fb, int x, int y) {
 
 	ioctl(fb->fd, 0x4680, &rect);
 }
+
+void blit(struct framebuffer *fb, const struct image *img, uint16_t alpha, int x, int y) {
+	int lines = img->height;
+	if(lines > FRAMEBUFFER_HEIGHT - y) lines = FRAMEBUFFER_HEIGHT - y;
+	for(int i = 0; i < lines; i++) {
+		for(int j = 0; j < img->width; j++) {
+			uint16_t *pixel = &img->buf[i * img->width + j];
+			if(!*pixel == alpha) fb->buf[(y+i) * FRAMEBUFFER_WIDTH + (x+j)] = *pixel;
+		}
+	}
+
+	struct fb_copyarea rect;
+	rect.dx = x;
+	rect.dy = y;
+	rect.width = img->width;
+	rect.height = lines;
+
+	ioctl(fb->fd, 0x4680, &rect);
+}

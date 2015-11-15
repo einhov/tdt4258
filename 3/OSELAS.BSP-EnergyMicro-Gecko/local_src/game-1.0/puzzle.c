@@ -143,7 +143,7 @@ int puzzle_input(struct puzzle *p, int input) {
 		draw_cursor(p->fb, p->cursor.x + 2, p->cursor.y);
 	}
 
-	if(p->cursor.x == old_x && p->cursor.y == old_y) return 0;
+	if(p->cursor.x == old_x && p->cursor.y == old_y) return p->remaining;
 
 	// Redraw over old cursor
 	printf("Refresh STATE: %d (%d,%d) (%d,%d)\n", p->state, p->choice1.x, p->choice1.y, p->choice2.x, p->choice2.y);
