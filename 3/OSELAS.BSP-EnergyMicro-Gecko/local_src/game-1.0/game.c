@@ -37,7 +37,7 @@ void gamepad_handler(int signal) {
 			}
 			break;
 		case GAME_STATE_INGAME:
-			if(puzzle_input(&p, c) <= 17) {
+			if(puzzle_input(&p, c) <= 0) {
 				victory_scene_init(&v, &fb);
 				state = GAME_STATE_VICTORY;
 			}
