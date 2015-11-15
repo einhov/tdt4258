@@ -67,8 +67,7 @@ int main(int argc, char *argv[]) {
 				sleep(10);
 				break;
 			case GAME_STATE_VICTORY:
-				if(!victory_scene_frame(&v)) usleep(50);
-				else sleep(10);
+				usleep(victory_scene_frame(&v));
 				break;
 		}
 	}
