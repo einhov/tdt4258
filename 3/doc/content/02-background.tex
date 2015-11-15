@@ -49,7 +49,42 @@ function on microcontrollers lacking MMUs.
 
 \section{C Standard Library and POSIX}
 
+In addition to having the OS kernel manage resources and hardware, it is also
+desireable to have access to a set of common functionalities and an interface to
+the kernel from the user application. The first is provided by the C Standard
+Library and the latter is mostly covered by the \emph{C POSIX Library}, a
+superset of the C Standard Library part of the POSIX Standard. The C Standard
+Library provides functionality for common tasks such as mathematical
+computations, input/ouput and memory allocation. The C POSIX Library extends on
+this with specifications for compatability with UNIX systems. The POSIX Standard
+also specifies the operation and behaviour of certain base system utilities. The
+toolchain used by the build system utilised for this exercise builds
+applications statically linked to the briefly aforementioned \textmu Clibc.
+\textmu Clibc is a C libray focused on maintaining a tiny size, intended for use
+on embedded systems.
+
 \section{BusyBox}
+
+BusyBox provides base utilities that implement required functionality for
+initialising and operating the system after the kernel has booted. The BusyBox
+binary is a statically linked program which is symbolically linked to other
+binary files. When the BusyBox binary is executed from the various symlinked
+files it will select a behaviour based on the name it got started as. Some
+essential BusyBox utilities for successfully initialising the system and
+starting the game are \texttt{/bin/sh}, \texttt{/bin/mount} and
+\texttt{/sbin/modprobe}. \texttt{/bin/sh} is the system shell. The system shell is
+an interactive shell the user can use to interact with the system over the
+serial connection. The system shell is also the first program to be executed by
+the kernel, as it is invoked to execute the shell script named
+\texttt{/linuxrc}, which sets up some parts of the system before executing the
+interactive shell. \texttt{/bin/mount} mounts filesystems to mountpoints in the
+file hierarchy. On the Linux system we're using, the main filesystem is already
+mounted to \texttt{/}, but \texttt{/bin/mount} is used during \texttt{/linuxrc}
+to mount the \texttt{/proc} and \texttt{/sys} filesystems, which represent
+information and interfaces from the Linux kernel as files in the file hierarchy.
+\texttt{/sbin/modprobe} is a utility which loads a kernel module into the Linux
+kernel, which will be elaborated on later. Further utilities in BusyBox are
+mainly useful for interactive usage of the Linux system.
 
 \section{ptxdist}
 
