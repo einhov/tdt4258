@@ -32,7 +32,7 @@ void gamepad_handler(int signal) {
 	read(controller, &c, 1);
 	switch(state) {
 		case GAME_STATE_INTRO:
-			if(intro_scene_input(&i)) {
+			if(intro_scene_input(&i, c)) {
 				puzzle_init(&p, &fb);
 				state = GAME_STATE_INGAME;
 			}
@@ -45,9 +45,8 @@ void gamepad_handler(int signal) {
 			break;
 		case GAME_STATE_VICTORY:
 			if(victory_scene_input(&v)) {
-				state = GAME_STATE_INGAME;
-				usleep(10000);
-				puzzle_init(&p, &fb);
+				state = GAME_STATE_INTRO;
+				intro_scene_init(&i, &fb);
 			}
 			break;
 	}

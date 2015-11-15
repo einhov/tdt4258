@@ -2,6 +2,7 @@
 #define __INTRO_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #include "graphics.h"
 
@@ -20,6 +21,6 @@ struct intro_scene {
 
 void intro_scene_init(struct intro_scene *s, struct framebuffer *fb);
 unsigned int intro_scene_frame(struct intro_scene *s);
-bool intro_scene_input(struct intro_scene *s);
+bool intro_scene_input(struct intro_scene *s, uint8_t c);
 
 #endif

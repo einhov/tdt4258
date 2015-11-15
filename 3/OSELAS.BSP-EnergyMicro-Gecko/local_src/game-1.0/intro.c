@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <sys/ioctl.h>
 #include <linux/fb.h>
 #include <math.h>
@@ -53,6 +54,7 @@ unsigned int intro_scene_frame(struct intro_scene *s) {
 	return 1000000;
 }
 
-bool intro_scene_input(struct intro_scene *s) {
-	return true;
+bool intro_scene_input(struct intro_scene *s, uint8_t c) {
+	if(c == 0) return false;
+	else return true;
 }
