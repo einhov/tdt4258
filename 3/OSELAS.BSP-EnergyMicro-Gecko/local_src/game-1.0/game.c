@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
+#include <time.h>
 
 #include <fcntl.h>
 #include <signal.h>
@@ -62,6 +63,8 @@ int main(int argc, char *argv[]) {
 	fcntl(controller, F_SETOWN, getpid());
 	int oflags = fcntl(controller, F_GETFL);
 	fcntl(controller, F_SETFL, oflags | FASYNC);
+
+	srand(time(0));
 
 	int err = framebuffer_init(&fb);
 	assert(err == 0);
