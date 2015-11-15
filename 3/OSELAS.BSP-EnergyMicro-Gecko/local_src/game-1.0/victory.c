@@ -19,17 +19,29 @@ void victory_scene_init(struct victory_scene *v, struct framebuffer *fb) {
 	v->state = VICTORY_SCENE_STATE_BG;
 }
 
-static void repair_background(struct framebuffer *fb, int x, int y, int w, int h) {
-	if(y + h > FRAMEBUFFER_HEIGHT) h = FRAMEBUFFER_HEIGHT - y;
+static void blit_repair_background(struct framebuffer *fb, int x1, int y1, int w, int h, int x2, int y2) {
+	if(y1 + h > FRAMEBUFFER_HEIGHT) h = FRAMEBUFFER_HEIGHT - y1;
 	for(int i = 0; i < h; i++) {
-		memcpy(&fb->buf[(y+i) * FRAMEBUFFER_WIDTH + x],
-			&victory_doge.buf[(y+i) * victory_doge.width + x],
-			w * 2);
+		if(y1 + i >= y2 + h - 1 || y1 + i < y2) {
+			memcpy(&fb->buf[(y1+i) * FRAMEBUFFER_WIDTH + x1],
+				&victory_doge.buf[(y1+i) * FRAMEBUFFER_WIDTH + x1],
+				w * 2);
+		} else {
+			for(int j = 0; j < w; j++) {
+				if(((x1 + j >= x2 + w) || (x1 + j < x2)) || (
+					(balloons.buf[i * w + j] != 0) &&
+					(balloons.buf[(i + (y1 - y2)) * w + (x1 - x2) + j] == 0)
+					)) {
+					fb->buf[(y1+i) * FRAMEBUFFER_WIDTH + x1 + j] =
+						victory_doge.buf[(y1+i) * FRAMEBUFFER_WIDTH + x1 + j];
+				}
+			}
+		}
 	}
 
 	struct fb_copyarea rect;
-	rect.dx = x;
-	rect.dy = y;
+	rect.dx = x1;
+	rect.dy = y1;
 	rect.width = w;
 	rect.height = h;
 	ioctl(fb->fd, 0x4680, &rect);
@@ -42,31 +54,32 @@ unsigned int victory_scene_frame(struct victory_scene *v) {
 			v->state = VICTORY_SCENE_STATE_BALLOON;
 			return 1;
 
-		case VICTORY_SCENE_STATE_BALLOON:
+		case VICTORY_SCENE_STATE_BALLOON: {
 			if(v->tick < 90) {
-				repair_background(v->fb,
-					40 + sin(M_2_PI * (v->tick / 6.)) * 10,
-					240 - v->tick * 2,
-					balloons.width, balloons.height);
+				int x1 = 40 + sin(M_2_PI * (v->tick / 6.)) * 10;
+				int y1 = 240 - v->tick * 2;
 				v->tick++;
-				blit(v->fb, &balloons, 0,
-					40 + sin(M_2_PI * (v->tick / 6.)) * 10,
-					240 - v->tick * 2);
+				int x2 = 40 + sin(M_2_PI * (v->tick / 6.)) * 10;
+				int y2 = 240 - v->tick * 2;
+				blit_repair_background(v->fb, x1, y1, balloons.width, balloons.height, x2, y2);
+				blit(v->fb, &balloons, 0, x2, y2);
 			} else {
+				v->tick--;
 				v->state = VICTORY_SCENE_STATE_IDLE;
 			}
 			return 1000000 / 24;
+		}
 
-		case VICTORY_SCENE_STATE_IDLE:
-			repair_background(v->fb,
-				40 + sin(M_2_PI * (v->tick / 6.)) * 10,
-				240 - 180 + sin(M_2_PI * (v->tick / 4.)) * 2,
-				balloons.width, balloons.height);
+		case VICTORY_SCENE_STATE_IDLE: {
+			int x1 = 40 + sin(M_2_PI * (v->tick / 6.)) * 10;
+			int y1 = 240 - 180 + sin(M_2_PI * (v->tick / 4.)) * 2;
 			v->tick++;
-			blit(v->fb, &balloons, 0,
-				40 + sin(M_2_PI * (v->tick / 6.)) * 10,
-				240 - 180 + sin(M_2_PI * (v->tick / 4.)) * 2);
+			int x2 = 40 + sin(M_2_PI * (v->tick / 6.)) * 10;
+			int y2 = 240 - 180 + sin(M_2_PI * (v->tick / 4.)) * 2;
+			blit_repair_background(v->fb, x1, y1, balloons.width, balloons.height, x2, y2);
+			blit(v->fb, &balloons, 0, x2, y2);
 			return 1000000 / 24;
+		}
 	}
 	return 1000000;
 }
