@@ -17,7 +17,8 @@
 enum game_state {
 	GAME_STATE_INTRO,
 	GAME_STATE_INGAME,
-	GAME_STATE_VICTORY
+	GAME_STATE_VICTORY,
+	GAME_STATE_QUIT
 };
 
 int controller = 0;
@@ -30,6 +31,8 @@ enum game_state state = GAME_STATE_INTRO;
 void gamepad_handler(int signal) {
 	uint8_t c;
 	read(controller, &c, 1);
+	if(c == 1<<5) state = GAME_STATE_QUIT;
+
 	switch(state) {
 		case GAME_STATE_INTRO:
 			if(intro_scene_input(&i, c)) {
@@ -48,6 +51,8 @@ void gamepad_handler(int signal) {
 				state = GAME_STATE_INTRO;
 				intro_scene_init(&i, &fb);
 			}
+			break;
+		case GAME_STATE_QUIT:
 			break;
 	}
 }
@@ -86,7 +91,7 @@ int main(int argc, char *argv[]) {
 			break;
 	}
 
-	for(;;) {
+	while(state != GAME_STATE_QUIT) {
 		switch(state) {
 			case GAME_STATE_INTRO:
 				usleep(intro_scene_frame(&i));
@@ -97,9 +102,13 @@ int main(int argc, char *argv[]) {
 			case GAME_STATE_VICTORY:
 				usleep(victory_scene_frame(&v));
 				break;
+			case GAME_STATE_QUIT:
+				break;
 		}
 	}
 
+	clear(&fb, 0, 0, FRAMEBUFFER_WIDTH, FRAMEBUFFER_HEIGHT);
+	framebuffer_clean(&fb);
 	close(controller);
 	exit(EXIT_SUCCESS);
 }

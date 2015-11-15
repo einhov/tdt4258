@@ -18,7 +18,10 @@ int framebuffer_init(struct framebuffer *fb) {
 }
 
 void framebuffer_clean(struct framebuffer *fb) {
+	munmap(fb->buf, FRAMEBUFFER_SIZE);
 	close(fb->fd);
+	fb->buf = NULL;
+	fb->fd = -1;
 }
 
 void clear(struct framebuffer *fb, int x, int y, int width, int height) {
