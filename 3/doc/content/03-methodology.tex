@@ -1,1 +1,88 @@
 \chapter{Methodology}
+
+\section{PTXdist and Linux}
+
+\subsection{The build system}
+
+Using the PTXdist build system proved to be a quite simple process. All commands
+given to the build system are invoked through the \texttt{ptxdist} executable.
+Before we could invoke the build system on the support files, we had to
+configure PTXdist to use the correct configurations. This was done by invoking
+the \texttt{ptxdist select <ptxconfig>}, \texttt{ptxdist platform
+<platformconfig>} and \texttt{ptxdist toolchain <path to toolchain>} commands
+with their respective arguments. After configuring PTXdist, to get the initial
+support files compiled and flashed all we found necessary to do was to invoke
+\texttt{ptxdist go}, \texttt{ptxdist images} and \texttt{ptxdist test
+flash-all}. These commands respectively built and installed all selected
+packages that had been configured, generated images ready to be flashed onto the
+development board, and flashed all the images to the board.
+
+The initial build and flash took a significant amount of time, so luckily the
+entire build is not required for changes to the driver or the game. Instead,
+individual packages could be updates by cleaning the previously built package
+with \texttt{ptxdist clean <package>}, compile it with \texttt{ptxdist compile
+<package>}, install it onto the root filesystem with \texttt{ptxdist
+targetinstall <package>} and finally flash only the root filesystem to the
+development board with \texttt{ptxdist test flash-romfs}. This made testing
+changes to our code iteratively a more pleasant process it would have been if
+rebuilding and reflashing everything had been required.
+
+\subsection{Interacting with Linux}
+
+With Linux flashed onto the development board and a terminal emulator
+communicating over the serial connection running on our development system, we
+got the kernel boot log and eventually got to a shell prompt. From there we
+started the game executable by invoking \texttt{game} and loaded the gamepad
+kernel module with \texttt{modprobe driver-gamepad}.
+
+\section{Implementing the Device Driver}
+
+While the ultimate goal of the device driver, namely accessing hardware
+registers to read gamepad data, is rather simple, the matter is complicated a
+bit by the necessity to work with the abstraction layers of the operating
+system. The driver module must implement interfaces imposed by the kernel in
+order to expose its own functionality to the rest of the system.
+
+\subsection{Init, Exit and Boilerplate}
+
+The main entry and exit points for the module are the gamepad\_init and
+gamepad\_cleanup functions. These two functions are exported from the module
+with the module\_init and module\_exit macros and are called when the module is
+loaded and unloaded, respectively. In gamepad\_init we set up the driver,
+allocate resources and configure the GPIO hardware. In gamepad\_cleanup we free
+our allocated resources and make sure the system will be in a valid state after
+the module has been unloaded. The MODULE\_DESCRIPTION and MODULE\_LICENSE macros
+are also used to encode a description and code licensing information in the
+module.
+
+\subsection{Adding a Device}
+
+Information about our device is stored in a few global variables in the module.
+\texttt{dev\_t dev} will hold the \emph{device numbers} for our device.  A
+second variable \texttt{struct cdev cdev} will hold information about our
+character device. A third variable \texttt{struct class *cl} will contain a
+pointer to a \emph{class structure}. Fourthly, a variable \texttt{struct
+file\_operations gamepad\_fops} holds function pointers to our character
+device's file operation functions.
+
+The first step of adding a device to the system, is to have a pair of numbers
+allocated for our new device. This is done by calling:
+
+\begin{lstlisting}
+	int alloc_chrdev_region(dev_t *dev, unsigned int firstminor,
+		unsigned int count, char *name):
+\end{lstlisting}
+
+This function allocates a range of \texttt{count} minor device numbers from a
+base of \texttt{firstminor} for a single dynamically allocated major device
+number, storing the major number and first minor number in dev. The character
+device structure \texttt{cdev} is together with a pointer to
+\texttt{gamepad\_fops} sent as arguments to:
+
+\begin{lstlisting}
+	void cdev_init(struct cdev *cdev,
+		struct file_operations *fops);
+\end{lstlisting}
+
+This initialises our character device structure, registering it with the correct
+file operations.

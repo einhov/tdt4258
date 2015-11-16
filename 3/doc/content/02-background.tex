@@ -155,6 +155,22 @@ from user applications. In addition to the main funtionality of reading and
 writing device files, there is also an alternative interface through the device
 file through the \texttt{ioctl} system call. While not used in our gamepad
 driver, the \texttt{ioctl} call is used while drawing into the framebuffer.
+Additionally, the user application can tell the Linux system to notify it
+through signals when new data is available to be read from a file. This allows
+for \emph{asynchronous input/output} where the user application is free to
+perform other tasks or sleep while it waits for new input, rather than having to
+constantly poll the file for new data.
+
+In this exercise our gamepad driver will implement a \emph{character device}. A
+character device behaves like a stream of characters, as opposed to a
+\emph{block device} which acts like a block of data where one can specify where
+in the block one wants to access. Devices on Linux are addressed with a pair of
+device numbers, named \emph{major} and \emph{minor} device numbers. When a
+character device is added to the system, it is associated with an instance of
+\texttt{struct file\_operations} which specifies what should happen when the
+character device is accessed. The structure stores function pointers to
+functions implementing certain file operations, such as opening the file,
+reading from and writing to the file.
 
 \section{Framebuffer}
 
