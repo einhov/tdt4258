@@ -3,9 +3,19 @@
 \section{EFM32GG-DK3750}
 
 As in the two first exercises, the system used for this exercise is the
-EFM32GG-DK3750 development board. Exact hardware details are of less importance
-than in earlier exercises due to abstraction layers provided by software which
-will be elaborated on in subsequent sections.
+EFM32GG-DK3750 development board together with the custom gamepad provided.
+Exact hardware details are of less importance than in earlier exercises due to
+abstraction layers provided by software which will be elaborated upon in
+subsequent sections. Specially relevant for this exercise are the gamepad and
+GPIO on the EFM32GG, and the EFM32GG-DK3750's LCD. The gamepad is accessed
+largely in the same way as in exercise 2, with some complications that will be
+made evident later. The LCD is a \(320 \times 240\) pixels large display. For
+this exercise it is not necessary to manually program the LCD, as access to it
+has been abstracted into a simple interface which is employed to manipulate the
+display. The UART is also utilised as a serial connection between the
+development board and a computer to enable more advanced interactivity with the
+board than the gamepad is capable of supplying. This serial connection is also
+managed for us.
 
 \section{Linux and \textmu Clinux}
 
@@ -138,16 +148,23 @@ filesystem and through \emph{device nodes} in \texttt{/dev}. In the device
 driver implemented in this exercise, only a \emph{device} node in \texttt{/dev}
 been utilised. To the user application a device node appears like a normal file
 which can be accessed with regular file input/input functions. When the user
-application performs reads or writes on the devie file, the requests are relayed
-to specified functions within the device driver. Thus the device driver can
-transfer data to and from the kernel, and by extension hardware, by request from
-user applications. In addition to the main funtionality of reading and writing
-device files, there is also an alternative interface through the device file
-through the \texttt{ioctl} system call. While not used in our gamepad driver,
-the \texttt{ioctl} call is used while drawing into the framebuffer.
+application performs reads or writes on the device file, the requests are
+relayed to specified functions within the device driver. Thus the device driver
+can transfer data to and from the kernel, and by extension hardware, by request
+from user applications. In addition to the main funtionality of reading and
+writing device files, there is also an alternative interface through the device
+file through the \texttt{ioctl} system call. While not used in our gamepad
+driver, the \texttt{ioctl} call is used while drawing into the framebuffer.
 
 \section{Framebuffer}
 
 The LCD on the development board is exposed to user applications through the
 \emph{fbdev} device driver. The driver registers a device node \texttt{/dev/fb0}
-into which image data can be written to draw on the display.
+which exposes a \emph{framebuffer}. The framebuffer is an area of memory
+representing the contents of the display. If data is written into the
+framebuffer, the display will reflect this by displaying the written data as
+pixels. The framebuffer exposed by fbdev on the EFM32GG-DK3750 has a resolution
+of \(320 \times 240\) pixels. Each bit has a depth of 16 bits. Colours are
+encoded additively as a combination of red, green and blue intensities, where
+each colour has a depth of 5, 6 and 5 bits respectively. This pixel format is
+commonly known as \emph{RGB565}.
