@@ -85,4 +85,60 @@ device structure \texttt{cdev} is together with a pointer to
 \end{lstlisting}
 
 This initialises our character device structure, registering it with the correct
-file operations.
+file operations. The next step is to add the character device to the system.
+This is done by calling:
+
+\begin{lstlisting}
+	int cdev_add(struct cdev *dev, dev_t num,
+		unsigned int count);
+\end{lstlisting}
+
+At this point the character device exists in the system and can be accessed by
+user applications if they access a device node with the major and minor number
+of the device. A final step in the initialisation of the device is done to make
+the device node appear in the file hierarchy. A class structure is created with:
+
+\begin{lstlisting}
+	struct class *class_create(struct module *owner,
+		const char *name);
+\end{lstlisting}
+
+And the device is finally created with:
+
+\begin{lstlisting}
+	struct device *device_create(struct class *class,
+		struct device *parent, dev_t devt, void *drvdata,
+		const char *fmt, ...);
+\end{lstlisting}
+
+Passing in our class structure and device numbers. \texttt{parent} and
+\texttt{drvdata} are unused, so we pass in \texttt{NULL} for those. At this
+point our gamepad driver has a character device registered with the kernel and
+there is a device node in the file hierarchy for the device.
+
+At module unload we need to destroy our device node and unregister the character
+device numbers. This is done in \texttt{gamepad\_cleanup} and is quite simple.
+Basically, every step done in \texttt{gamepad\_init} is undone in reverse order.
+The device is destroyed with:
+
+\begin{lstlisting}
+	void device_destroy(struct class *class, dev_t devt);
+\end{lstlisting}
+
+The class is then destroyed with:
+
+\begin{lstlisting}
+	void class_destroy(struct class *cls);
+\end{lstlisting}
+
+Then the character device is deleted:
+
+\begin{lstlisting}
+	void cdev_del(struct cdev *);
+\end{lstlisting}
+
+And finally the character device number is unregistered:
+
+\begin{lstlisting}
+	void unregister_chrdev_region(dev_t	from, unsigned count);
+\end{lstlisting}
