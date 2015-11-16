@@ -64,7 +64,7 @@ static struct file_operations gamepad_fops = {
 irqreturn_t gamepad_handler(int irq, void *dev) {
 	status = ~ioread8(&GPIO->PC.DIN);
 	if(fasync_queue) kill_fasync(&fasync_queue, SIGIO, POLL_IN);
-	GPIO->IFC = GPIO->IF;
+	iowrite32(ioread32(&GPIO->IF), &GPIO->IFC);
 	return IRQ_HANDLED;
 }
 
@@ -114,6 +114,7 @@ static int __init gamepad_init(void)
 
 static void __exit gamepad_cleanup(void)
 {
+	iowrite32(0, &GPIO->IEN);
 	free_irq(17, NULL);
 	free_irq(18, NULL);
 	iounmap(GPIO);
