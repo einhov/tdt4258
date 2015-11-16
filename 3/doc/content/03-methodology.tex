@@ -142,3 +142,155 @@ And finally the character device number is unregistered:
 \begin{lstlisting}
 	void unregister_chrdev_region(dev_t	from, unsigned count);
 \end{lstlisting}
+
+\subsection{Accessing GPIO, Interrupts and Asynchronous Input/Output}
+
+\subsubsection{Reading from the Device}
+
+So there is a character device responding with data when read, but where that
+data comes from hasn't been mentioned yet. The data comes from the function set
+to the \texttt{read} field of the \texttt{gamepad\_fops} structure. In our
+driver this function is
+
+\begin{lstlisting}
+	static ssize_t gamepad_read(struct file *filp,
+		char __user *buf, size_t count, loff_t *offp)
+\end{lstlisting}
+
+Of its parameters, only \texttt{buf} and \texttt{count} are used. \texttt{buf}
+is a pointer to a buffer in userspace where data should be transferred.
+\texttt{count} is the maximum amount of bytes that should be read into the
+buffer. The return value of the function is how many bytes were stored into the
+user's buffer. Our driver stores the gamepad status in a global variable
+\texttt{uint8\_t status}, so all the \texttt{gamepad\_read} function needs to do
+is to copy the value of that one byte into the user's buffer. The driver should
+not attempt to write directly into the buffer through the pointer, but rather
+use an existing function in the kernel to copy data from the kernel into user
+memory:
+
+\begin{lstlisting}
+	unsigned long copy_to_user(void __user *to,
+	 	const void *from, unsigned long n);
+\end{lstlisting}
+
+Where \texttt{to} is \texttt{buf}, \texttt{from} is \texttt{\&status} and
+\texttt{n} is 1.
+
+\subsubsection{Hardware IO and Interrupts}
+
+So we can read the \texttt{status} variable from the user application through
+the character device, but we still need to read the status from the gamepad into
+\texttt{status}. This is done in much the same way as in exercise 2, the GPIO
+hardware is initialised by configuring the correct hardware registers. We wish
+for the GPIO hardware to issue interrupts on button presses, so in addition to
+enabling the GPIO pins we also configure and enable interrupts. In exercise 2 we
+wrote directly to the hardware registers. This is not a good idea in a Linux
+driver, where the standard interfaces should be utilised to play nicely with
+other parts of the system. While it is technically possible to simply write
+directly to the hardware registers in this case, due to the microcontroller's
+lack of an MCU, we have attempted to follow the standard procedures for writing
+to hardware. This procedure involves requesting a region of I/O memory and
+remapping the area into memory. This last step does essentially nothing on this
+particular system, as the microcontroller has no concept of virtual memory. As a
+result the memory area will simple be remapped to its original location. Due to
+portability it is still recommended to follow this procedure, however. The two
+functions called to achieve this are:
+
+\begin{lstlisting}
+	struct resource *request_mem_region(unsigned long start,
+		unsigned long len, char *name);
+
+	void *ioremap_nocache(unsigned long phys_addr,
+		unsigned long size);
+\end{lstlisting}
+
+The pointer to the remapped memory region is stored in a global variable
+\texttt{volatile struct efm32gg\_gpio *GPIO}. The \texttt{struct efm32gg\_gpio}
+structure describes the layout of the GPIO hardware registers. With the hardware
+registers requested and mapped, we can start configuring the GPIO hardware.
+Instead of dereferencing \texttt{GPIO} directly, we use another kernel function
+, \texttt{iowrite32}, designed to write to I/O memory:
+
+\begin{lstlisting}
+	/* configure pins */
+	iowrite32(0x33333333, &GPIO->PC.MODEL);
+    iowrite32(0xff, &GPIO->PC.DOUT);
+
+	/* configure pin interrupt */
+    iowrite32(0x22222222, &GPIO->EXTIPSELL);
+    iowrite32(0xff, &GPIO->EXTIFALL);
+    iowrite32(0xff, &GPIO->EXTIRISE);
+
+	/* enable gpio interrupts */
+    iowrite32(0xff, &GPIO->IEN);
+    iowrite32(0xff, &GPIO->IFC);
+\end{lstlisting}
+
+The GPIO hardware is now configured and issuing interrupts on button presses
+from the gamepad, but we still need to register the interrupt requests with
+Linux and tell it what we want to have done when it receives the interrupt. This
+is done with:
+
+\begin{lstlisting}
+	request_irq(unsigned int irq, irq_handler_t handler,
+		unsigned long flags, const char *name, void *dev);
+\end{lstlisting}
+
+\texttt{irq} is the number of the interrupt request we wish to register. The
+relevant numbers for GPIO even and GPIO odd interrupts are supplied in the
+TDT4258 compendium \cite{TDT4528Compendium}. \texttt{handler} is a function
+pointer to a callback function which will be invoked when an interrupt request
+is fired. We set this to a function in our module named
+\texttt{gamepad\_handler}. The interrupt handler uses I/O access functions to
+read the status of the controller into \texttt{status} and clear the GPIO
+interrupt flags.
+
+Resources allocated to the driver for accessing the hardware registers should
+also be freed on module unload. This is also done in \texttt{gamepad\_cleanup}.
+Firstly by clearing \texttt{GPIO->IEN} to disable interrupts from the GPIO, then
+by calling the following function to free the interrupt request lines we
+requested from the kernel:
+
+\begin{lstlisting}
+	void free_irq(unsigned int irq, void *dev_id);
+\end{lstlisting}
+
+The mapped GPIO hardware registers are subsequently unmapped with:
+
+\begin{lstlisting}
+	void iounmap(void * addr);
+\end{lstlisting}
+
+And the GPIO hardware memory region is released with:
+
+\begin{lstlisting}
+	void release_mem_region(unsigned long start,
+		unsigned long len);
+\end{lstlisting}
+
+\subsubsection{Asynchronous Input/Output}
+
+We wish for the device driver to be able to signal the user application whenever
+a GPIO interrupt occurs. This is achieved in our driver using asynchronous
+notification with the SIGIO signal. There is very little additional code that
+needs to be added for the device driver to have this functionality. A global
+\texttt{struct fasync\_struct *fasync\_queue} is declared to hold a queue of
+processes that should be notified of an interrupt. In \texttt{gamepad\_fops} the
+\texttt{fasync} field is set to a function \texttt{gamepad\_fasync} and the
+\texttt{release} field is set to a function \texttt{gamepad\_release}.
+\texttt{gamepad\_fasync} is then invoked every time a user process enables or
+disables asynchronous notifications from the file descriptor to our device
+driver. The function uses a helper function called \texttt{fasync\_helper} which
+adds the process to or removes the process from the queue.
+\texttt{gamepad\_fasync} is also issued from \texttt{gamepad\_release}, so that
+processes are removed from the queue if they close the device driver. Finally,
+in the \texttt{gamepad\_handler} we issue the signal to all listening processes
+by invoking:
+
+\begin{lstlisting}
+	void kill_fasync(struct fasync_struct **fa,
+		int sig, int band);
+\end{lstlisting}
+
+With a \texttt{sig} of \texttt{SIGIO}. As a result, all listening processes
+receive a SIGIO signal.
