@@ -1,1 +1,12 @@
 \chapter{Conclusion}
+
+To conclude, we've gained experience writing software for a Linux system, both
+user applications targetting the POSIX API and software for the kernel, in the
+form of a kernel module. Writing an application for the system on bare metal and
+for a managed system, such as the Linux system we employed, differ quite a bit
+in their methods. Writing for the Linux system abstracts the hardware behind a
+portable and helpful API, while also complicating some tasks that might be
+simpler to perform on bare metal. However, that price is probably fine when the
+tradeoff is access to the abstractions it provides. Many user applications can
+be developped faster for this abstraction layer than for bare metal, and be
+written far more portable.

@@ -7,15 +7,15 @@
 Using the PTXdist build system proved to be a quite simple process. All commands
 given to the build system are invoked through the \texttt{ptxdist} executable.
 Before we could invoke the build system on the support files, we had to
-configure PTXdist to use the correct configurations. This was done by invoking
-the \texttt{ptxdist select <ptxconfig>}, \texttt{ptxdist platform
-<platformconfig>} and \texttt{ptxdist toolchain <path to toolchain>} commands
-with their respective arguments. After configuring PTXdist, to get the initial
-support files compiled and flashed all we found necessary to do was to invoke
-\texttt{ptxdist go}, \texttt{ptxdist images} and \texttt{ptxdist test
-flash-all}. These commands respectively built and installed all selected
-packages that had been configured, generated images ready to be flashed onto the
-development board, and flashed all the images to the board.
+configure PTXdist to use the correct configurations \cite{TDT4528Compendium}.
+This was done by invoking the \texttt{ptxdist select <ptxconfig>},
+\texttt{ptxdist platform <platformconfig>} and \texttt{ptxdist toolchain <path
+to toolchain>} commands with their respective arguments. After configuring
+PTXdist, to get the initial support files compiled and flashed all we found
+necessary to do was to invoke \texttt{ptxdist go}, \texttt{ptxdist images} and
+\texttt{ptxdist test flash-all}. These commands respectively built and installed
+all selected packages that had been configured, generated images ready to be
+flashed onto the development board, and flashed all the images to the board.
 
 The initial build and flash took a significant amount of time, so luckily the
 entire build is not required for changes to the driver or the game. Instead,

@@ -7,15 +7,15 @@ EFM32GG-DK3750 development board together with the custom gamepad provided.
 Exact hardware details are of less importance than in earlier exercises due to
 abstraction layers provided by software which will be elaborated upon in
 subsequent sections. Specially relevant for this exercise are the gamepad and
-GPIO on the EFM32GG, and the EFM32GG-DK3750's LCD. The gamepad is accessed
-largely in the same way as in exercise 2, with some complications that will be
-made evident later. The LCD is a \(320 \times 240\) pixels large display. For
-this exercise it is not necessary to manually program the LCD, as access to it
-has been abstracted into a simple interface which is employed to manipulate the
-display. The UART is also utilised as a serial connection between the
-development board and a computer to enable more advanced interactivity with the
-board than the gamepad is capable of supplying. This serial connection is also
-managed for us.
+GPIO on the EFM32GG, and the EFM32GG-DK3750's LCD \cite{TDT4528Compendium}. The gamepad is
+accessed largely in the same way as in exercise 2, with some complications that
+will be made evident later. The LCD is a \(320 \times 240\) pixels large display
+\cite{TDT4528Compendium}. For this exercise it is not necessary to manually program the
+LCD, as access to it has been abstracted into a simple interface which is
+employed to manipulate the display. The UART is also utilised as a serial
+connection between the development board and a computer to enable more advanced
+interactivity with the board than the gamepad is capable of supplying. This
+serial connection is also managed for us.
 
 \section{Linux and \textmu Clinux}
 
@@ -40,19 +40,20 @@ application programmer. Such a system is called an \emph{Operating System}
 (\textbf{OS}).
 
 For this exercise the application was developped to run on an OS based on the
-\emph{Linux kernel}. The Linux kernel is an \emph{UNIX-like} kernel, which means
-that its interfaces to user applications mimic ones from a family of OSes known
-as \emph{UNIX}. Of relevance to this exercise is that, due to Linux' UNIX-like
-nature, it closely follows the \emph{POSIX standard}, which gives us a formally
-defined API to code for. We will get back to POSIX and introduce the \emph{C
-Standard Library} in the next section. The Linux kernel is often paired with a
-set of applications, such as a shell and base tools to operate the system, and a
-C library to form a complete OS. On desktop PCs, software from the GNU
-collection is normally used. On embedded systems, such as in our exercise, the
-software in the GNU collection is usually unsuitable due to its size and
-performance footprint. The system we programmed for is instead using the
-\emph{BusyBox} utilities and \emph{\textmu Clibc} library, which we will get
-back to shortly.
+\emph{Linux kernel} \cite{TDT4528Compendium}. The Linux kernel is an
+\emph{UNIX-like} kernel, which means that its interfaces to user applications
+mimic ones from a family of OSes known as \emph{UNIX}. Of relevance to this
+exercise is that, due to Linux' UNIX-like nature, it closely follows the
+\emph{POSIX standard} \cite{posix}, which gives us a formally defined API to
+code for. We will get back to POSIX and introduce the \emph{C Standard Library}
+in the next section.  The Linux kernel is often paired with a set of
+applications, such as a shell and base tools to operate the system, and a C
+library to form a complete OS. On desktop PCs, software from the GNU collection
+is normally used. On embedded systems, such as in our exercise, the software in
+the GNU collection is usually unsuitable due to its size and performance
+footprint. The system we programmed for is instead using the \emph{BusyBox}
+utilities \cite{busy} and \emph{\textmu Clibc} \cite{ulibc} library, which we
+will get back to shortly.
 
 The standard Linux kernel is designed to run on processors with a \emph{Memory
 Management Unit} (\textbf{MMU}). The MMU is a unit of a CPU responsible for
@@ -62,39 +63,39 @@ memory addresses}, allowing programs to address memory independently of its
 physical location, or perform access control to memory based on a program's
 priveleges. As the EFM32GG microcontroller on the EFM32GG-DK3750 development
 board we are using for the exercise does not have an MMU, we are using a port of
-Linux called \textmu Clinux, which is a port of the Linux kernel patched to
-function on microcontrollers lacking MMUs. Amongst other things, the \textmu
-Clinux kernel handles clocks, timers and interrupts for us, which means that a
-lot of the setup code written in exercise 1 and 2 did not need to be written for
-exercise 3.
+Linux called \textmu Clinux \cite{ulinux}, which is a port of the Linux kernel
+patched to function on microcontrollers lacking MMUs. Amongst other things, the
+\textmu Clinux kernel handles clocks, timers and interrupts for us, which means
+that a lot of the setup code written in exercise 1 and 2 did not need to be
+written for exercise 3.
 
 \section{C Standard Library and POSIX}
 
 In addition to having the OS kernel manage resources and hardware, it is also
 desireable to have access to a set of common functionalities and an interface to
 the kernel from the user application. The first is provided by the C Standard
-Library and the latter is mostly covered by the \emph{C POSIX Library}, a
-superset of the C Standard Library part of the POSIX Standard. The C Standard
-Library provides functionality for common tasks such as mathematical
-computations, input/ouput and memory allocation. The C POSIX Library extends on
-this with specifications for compatability with UNIX systems. The POSIX Standard
-also specifies the operation and behaviour of certain base system utilities. The
-toolchain used by the build system utilised for this exercise builds
-applications statically linked to the briefly aforementioned \textmu Clibc.
-\textmu Clibc is a C libray focused on maintaining a tiny size, intended for use
-on embedded systems.
+Library and the latter is mostly covered by the \emph{C POSIX Library}
+\cite{posix}, a superset of the C Standard Library part of the POSIX Standard.
+The C Standard Library provides functionality for common tasks such as
+mathematical computations, input/ouput and memory allocation. The C POSIX
+Library extends on this with specifications for compatability with UNIX systems.
+The POSIX Standard also specifies the operation and behaviour of certain base
+system utilities. The toolchain used by the build system utilised for this
+exercise builds applications statically linked to the briefly aforementioned
+\textmu Clibc \cite{ulibc}. \textmu Clibc is a C libray focused on maintaining a
+tiny size, intended for use on embedded systems.
 
 \section{BusyBox}
 
-BusyBox provides base utilities that implement required functionality for
-initialising and operating the system after the kernel has booted. The BusyBox
-binary is a statically linked program which is symbolically linked to other
-binary files. When the BusyBox binary is executed from the various symlinked
-files it will select a behaviour based on the name it got started as. Some
-essential BusyBox utilities for successfully initialising the system and
-starting the game are \texttt{/bin/sh}, \texttt{/bin/mount} and
-\texttt{/sbin/modprobe}. \texttt{/bin/sh} is the system shell. The system shell is
-an interactive shell the user can use to interact with the system over the
+BusyBox \cite{busy} provides base utilities that implement required
+functionality for initialising and operating the system after the kernel has
+booted. The BusyBox binary is a statically linked program which is symbolically
+linked to other binary files. When the BusyBox binary is executed from the
+various symlinked files it will select a behaviour based on the name it got
+started as. Some essential BusyBox utilities for successfully initialising the
+system and starting the game are \texttt{/bin/sh}, \texttt{/bin/mount} and
+\texttt{/sbin/modprobe}. \texttt{/bin/sh} is the system shell. The system shell
+is an interactive shell the user can use to interact with the system over the
 serial connection. The system shell is also the first program to be executed by
 the kernel, as it is invoked to execute the shell script named
 \texttt{/linuxrc}, which sets up some parts of the system before executing the
@@ -119,12 +120,12 @@ containing files that should be available on the system at runtime. A manual
 construction process to all of this would be tiresome and prone to errors. On
 personal computers and many embedded systems, this is solved with pre-assembled
 distributions of operating systems. To build the system during this exercise we
-employed the \emph{PTXdist} build system. PTXdist is a build system designed to
-build tiny Linux distributions for embedded systems. The support files we
-received for the exercise included a PTXdist project set up to compile a proper
-\textmu Clinux kernel, build a user application stub called \emph{game} and a
-Linux module stub called \emph{driver-gamepad}, and to build and flash complete
-images of the resulting systems.
+employed the \emph{PTXdist} build system \cite{TDT4528Compendium}. PTXdist is a
+build system designed to build tiny Linux distributions for embedded systems.
+The support files we received for the exercise included a PTXdist project set up
+to compile a proper \textmu Clinux kernel, build a user application stub called
+\emph{game} and a Linux module stub called \emph{driver-gamepad}, and to build
+and flash complete images of the resulting systems.
 
 \section{Kernel Modules and Device Drivers}
 
@@ -132,41 +133,42 @@ Reading input from the gamepad in Linux is done in largely the same way as in
 the previous exercises. There are, however, a few major differences. The user
 application \emph{should not}, and in systems where memory is more strictly
 managed \emph{can not}, access hardware directly. Rather, the Linux kernel has
-to expose the hardware to the user application through some sort of interface.
-A piece of code in the kernel responsible for maintaining a hardware device and
-exposing its functionality to user applications is called a \emph{device
-driver}. The code is part of a \emph{kernel module}, which is a separate unit of
-code which can be registered into a running kernel. Each module is written
-according to a kernel module interface, so that the kernel knows how to load the
-module. Kernel modules for Linux can be configured to be built into the kernel
-at compile time or to be compiled into separate dynamically loadable kernel
-object files, which are loaded into the kernel with the \texttt{modprobe}
+to expose the hardware to the user application through some sort of interface
+\cite{ldd}. A piece of code in the kernel responsible for maintaining a
+hardware device and exposing its functionality to user applications is called a
+\emph{device driver}. The code is part of a \emph{kernel module}, which is a
+separate unit of code which can be registered into a running kernel. Each module
+is written according to a kernel module interface, so that the kernel knows how
+to load the module. Kernel modules for Linux can be configured to be built into
+the kernel at compile time or to be compiled into separate dynamically loadable
+kernel object files, which are loaded into the kernel with the \texttt{modprobe}
 utility.
 
 A device driver exports an interface to the device through the \texttt{/sys}
-filesystem and through \emph{device nodes} in \texttt{/dev}. In the device
-driver implemented in this exercise, only a \emph{device} node in \texttt{/dev}
-been utilised. To the user application a device node appears like a normal file
-which can be accessed with regular file input/input functions. When the user
-application performs reads or writes on the device file, the requests are
-relayed to specified functions within the device driver. Thus the device driver
-can transfer data to and from the kernel, and by extension hardware, by request
-from user applications. In addition to the main funtionality of reading and
-writing device files, there is also an alternative interface through the device
-file through the \texttt{ioctl} system call. While not used in our gamepad
-driver, the \texttt{ioctl} call is used while drawing into the framebuffer.
-Additionally, the user application can tell the Linux system to notify it
-through signals when new data is available to be read from a file. This allows
-for \emph{asynchronous input/output} where the user application is free to
-perform other tasks or sleep while it waits for new input, rather than having to
-constantly poll the file for new data.
+filesystem and through \emph{device nodes} in \texttt{/dev} \cite{ldd}. In the
+device driver implemented in this exercise, only a \emph{device} node in
+\texttt{/dev} been utilised. To the user application a device node appears like
+a normal file which can be accessed with regular file input/input functions.
+When the user application performs reads or writes on the device file, the
+requests are relayed to specified functions within the device driver. Thus the
+device driver can transfer data to and from the kernel, and by extension
+hardware, by request from user applications. In addition to the main
+funtionality of reading and writing device files, there is also an alternative
+interface through the device file through the \texttt{ioctl} system call. While
+not used in our gamepad driver, the \texttt{ioctl} call is used while drawing
+into the framebuffer \cite{TDT4528Compendium}. Additionally, the user
+application can tell the Linux system to notify it through signals when new data
+is available to be read from a file. This allows for \emph{asynchronous
+input/output} where the user application is free to perform other tasks or sleep
+while it waits for new input, rather than having to constantly poll the file for
+new data.
 
-In this exercise our gamepad driver will implement a \emph{character device}. A
-character device behaves like a stream of characters, as opposed to a
-\emph{block device} which acts like a block of data where one can specify where
-in the block one wants to access. Devices on Linux are addressed with a pair of
-device numbers, named \emph{major} and \emph{minor} device numbers. When a
-character device is added to the system, it is associated with an instance of
+In this exercise our gamepad driver will implement a \emph{character device}
+\cite{ldd}. A character device behaves like a stream of characters, as opposed
+to a \emph{block device} which acts like a block of data where one can specify
+where in the block one wants to access. Devices on Linux are addressed with a
+pair of device numbers, named \emph{major} and \emph{minor} device numbers. When
+a character device is added to the system, it is associated with an instance of
 \texttt{struct file\_operations} which specifies what should happen when the
 character device is accessed. The structure stores function pointers to
 functions implementing certain file operations, such as opening the file,
@@ -180,7 +182,7 @@ which exposes a \emph{framebuffer}. The framebuffer is an area of memory
 representing the contents of the display. If data is written into the
 framebuffer, the display will reflect this by displaying the written data as
 pixels. The framebuffer exposed by fbdev on the EFM32GG-DK3750 has a resolution
-of \(320 \times 240\) pixels. Each bit has a depth of 16 bits. Colours are
-encoded additively as a combination of red, green and blue intensities, where
-each colour has a depth of 5, 6 and 5 bits respectively. This pixel format is
-commonly known as \emph{RGB565}.
+of \(320 \times 240\) pixels \cite{TDT4528Compendium}. Each bit has a depth of
+16 bits. Colours are encoded additively as a combination of red, green and blue
+intensities, where each colour has a depth of 5, 6 and 5 bits respectively. This
+pixel format is commonly known as \emph{RGB565}.

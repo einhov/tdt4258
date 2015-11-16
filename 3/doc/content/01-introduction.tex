@@ -1,1 +1,33 @@
 \chapter{Introduction}
+
+For this third exercise in TDT4258 we were tasked with implementing a game on
+the EFM32GG-DK3750 development board. The game was to run on a Linux system on
+the development board, drawing visuals on the development board's graphical
+display and reading input from the gamepad over GPIO. The game was supposed to
+run as a user application, getting gamepad data from a kernel mode device driver
+we were also tasked to implement.
+
+For our game we chose to implement a version of a board game known as
+\emph{Concentration}. In concentration a grid of tiles are on a table face down.
+Each tile has a corresponding match. The player flips pairs of tiles. If the
+tiles match, that pair is unlocked and will remain face up. When every pair has
+been unlocked, the player has won the game. The motif of the tiles in our game
+are Shiba Inu dogs. We have therefore named our game Shiba Inu Match.
+
+To start the game successfully, the gamepad driver must first be loaded. This is
+done by issuing \texttt{modprobe driver-gamepad} in the shell on the device.
+After the module has loaded, the game is started by issuing \texttt{game}.
+
+The controls for the game are simple. The leftmost buttons on the controller
+moves a cursor around. On the rightmost buttons, the left button selects a tile.
+The game can also be turned off with the up button of the rightmost buttons,
+returning the Linux system to the shell. The game has an intro image, which is
+progressed through by clicking any button on the controller, except for the
+turn off button. Similarily, after winning the game there is a victory
+animation, which will send the player back to the intro image upon any button
+press, except for the turn off button.
+
+The game can also be started directly in the game mode or the victory animation,
+by issuing \texttt{game 2} or \texttt{game 3} respectively. This is a nice
+shortcut to watch the victory animation without having to finished a game of
+Shiba Inu Match.
