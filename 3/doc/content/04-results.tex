@@ -1,1 +1,41 @@
 \chapter{Results}
+
+\section{Correctness}
+
+Our game correctly reads input from the gamepad driver and draws correctly to
+the frambebuffer. Small artifacts are noticable in the animated blitted
+balloons.
+
+\section{Energy Efficiency}
+
+Energy consumption data is summarized in the following tables. It is obvious
+that compiling the Linux kernel with tickless idle considerably lowers the
+energy consumption, even during animated sequences. The listed energy
+consumptions for the ending animation is the average consumption \emph{after}
+the entire balloon has entered the display. The energy consumption is lower with
+the balloon partially outside the display, which makes it obvious that the
+effect is quite power hungry, at least as it is implemented in our game.
+
+\begin{table}
+\caption{Tickless Idle}
+\centering
+\label{tab:tickless}
+\begin{tabular}{l r}
+	Intro animation:&10.78mA\\
+	Intro idle:&7.68mA\\
+	Game idle:&7.62mA\\
+	Ending animation:&14.54mA
+\end{tabular}
+\end{table}
+
+\begin{table}
+\caption{Fixed Timer}
+\centering
+\label{tab:fixed}
+\begin{tabular}{l r}
+	Intro animation:&11.25mA\\
+	Intro idle:&10.31mA\\
+	Game idle:&10.28mA\\
+	Ending animation:&15.28mA
+\end{tabular}
+\end{table}
