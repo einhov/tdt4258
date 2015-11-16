@@ -1,5 +1,12 @@
 \chapter{Background and Theory}
 
+\section{EFM32GG-DK3750}
+
+As in the two first exercises, the system used for this exercise is the
+EFM32GG-DK3750 development board. Exact hardware details are of less importance
+than in earlier exercises due to abstraction layers provided by software which
+will be elaborated on in subsequent sections.
+
 \section{Linux and \textmu Clinux}
 
 In exercise 1 and 2 we programmed the development board in an unmanaged
@@ -17,9 +24,10 @@ development of the application itself. The resulting application would also be
 specialised to run on the specific platform it initially targetted and
 supporting additional platforms would rapidly increase the complexity of its
 complexity. An alternative to programming on bare metal is to develop
-applications for a managed system that does hardware initialisation and
-configuration, and manages resources for the the application programmer. Such a
-system is called an \emph{Operating System} (\textbf{OS}).
+applications for an abstraction layer provided by a managed system that does
+hardware initialisation and configuration, and manages resources for the the
+application programmer. Such a system is called an \emph{Operating System}
+(\textbf{OS}).
 
 For this exercise the application was developped to run on an OS based on the
 \emph{Linux kernel}. The Linux kernel is an \emph{UNIX-like} kernel, which means
@@ -45,7 +53,10 @@ physical location, or perform access control to memory based on a program's
 priveleges. As the EFM32GG microcontroller on the EFM32GG-DK3750 development
 board we are using for the exercise does not have an MMU, we are using a port of
 Linux called \textmu Clinux, which is a port of the Linux kernel patched to
-function on microcontrollers lacking MMUs.
+function on microcontrollers lacking MMUs. Amongst other things, the \textmu
+Clinux kernel handles clocks, timers and interrupts for us, which means that a
+lot of the setup code written in exercise 1 and 2 did not need to be written for
+exercise 3.
 
 \section{C Standard Library and POSIX}
 
@@ -86,8 +97,57 @@ information and interfaces from the Linux kernel as files in the file hierarchy.
 kernel, which will be elaborated on later. Further utilities in BusyBox are
 mainly useful for interactive usage of the Linux system.
 
-\section{ptxdist}
+\section{Distributions and PTXdist}
+
+To get a working Linux system on the development board, it is necessary to flash
+a few images to the board's flash memory. A platform specific \emph{bootloader}
+containing instructions for early initialisation of hardware and loading of the
+Linux kernel. Further it is necessary to flash the Linux kernel itself alongside
+a platform specific \emph{Device Tree Blob} which describes the hardware
+configuration of the targetted platform. Finally a \emph{root file system} image
+containing files that should be available on the system at runtime. A manual
+construction process to all of this would be tiresome and prone to errors. On
+personal computers and many embedded systems, this is solved with pre-assembled
+distributions of operating systems. To build the system during this exercise we
+employed the \emph{PTXdist} build system. PTXdist is a build system designed to
+build tiny Linux distributions for embedded systems. The support files we
+received for the exercise included a PTXdist project set up to compile a proper
+\textmu Clinux kernel, build a user application stub called \emph{game} and a
+Linux module stub called \emph{driver-gamepad}, and to build and flash complete
+images of the resulting systems.
+
+\section{Kernel Modules and Device Drivers}
+
+Reading input from the gamepad in Linux is done in largely the same way as in
+the previous exercises. There are, however, a few major differences. The user
+application \emph{should not}, and in systems where memory is more strictly
+managed \emph{can not}, access hardware directly. Rather, the Linux kernel has
+to expose the hardware to the user application through some sort of interface.
+A piece of code in the kernel responsible for maintaining a hardware device and
+exposing its functionality to user applications is called a \emph{device
+driver}. The code is part of a \emph{kernel module}, which is a separate unit of
+code which can be registered into a running kernel. Each module is written
+according to a kernel module interface, so that the kernel knows how to load the
+module. Kernel modules for Linux can be configured to be built into the kernel
+at compile time or to be compiled into separate dynamically loadable kernel
+object files, which are loaded into the kernel with the \texttt{modprobe}
+utility.
+
+A device driver exports an interface to the device through the \texttt{/sys}
+filesystem and through \emph{device nodes} in \texttt{/dev}. In the device
+driver implemented in this exercise, only a \emph{device} node in \texttt{/dev}
+been utilised. To the user application a device node appears like a normal file
+which can be accessed with regular file input/input functions. When the user
+application performs reads or writes on the devie file, the requests are relayed
+to specified functions within the device driver. Thus the device driver can
+transfer data to and from the kernel, and by extension hardware, by request from
+user applications. In addition to the main funtionality of reading and writing
+device files, there is also an alternative interface through the device file
+through the \texttt{ioctl} system call. While not used in our gamepad driver,
+the \texttt{ioctl} call is used while drawing into the framebuffer.
 
 \section{Framebuffer}
 
-\section{Device Drivers}
+The LCD on the development board is exposed to user applications through the
+\emph{fbdev} device driver. The driver registers a device node \texttt{/dev/fb0}
+into which image data can be written to draw on the display.
