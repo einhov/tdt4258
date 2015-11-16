@@ -294,3 +294,131 @@ by invoking:
 
 With a \texttt{sig} of \texttt{SIGIO}. As a result, all listening processes
 receive a SIGIO signal.
+
+\section{Implementing the Game}
+
+The game consists of three scenes; an intro scene, the game scene and an ending
+scene. Relevant aspects of each scene will be discussed in this section, but
+first some words about initialisation of the program and receiving input.
+
+\subsection{Initialisation and Input}
+
+The game uses both the framebuffer and the gamepad driver. The framebuffer is
+initialised in \texttt{framebuffer\_init} in \texttt{graphics.c}. The famebuffer
+device, \texttt{/dev/fb0} is opened with:
+
+\begin{lstlisting}
+	int open(const char *pathname, int flags);
+\end{lstlisting}
+
+With flags of \texttt{O\_RDWR} for both read and write access. The framebuffer
+is then mapped into the game's process' memory with:
+
+\begin{lstlisting}
+	void *mmap(void *addr, size_t length, int prot,
+		int flags, int fd, off_t offset);
+\end{lstlisting}
+
+The returned pointer can then be used to directly access the framebuffer as
+regular memory in C. After the framebuffer has been written to, we issue an
+\texttt{ioctl} call on the framebuffer's file descriptor with a command of
+0x4680 and an argument of a \texttt{struct fb\_copyarea*} which describes to get
+the modified area of the framebuffer drawn to the LCD.
+
+The gamepad device is similarily opened in \texttt{game.c}, with flag
+\texttt{O\_RDONLY} since the gamepad driver doesn't support writes. A signal
+handler for the \texttt{SIGIO} signal is registered with the following function:
+
+\begin{lstlisting}
+	int sigaction(int sig, const struct sigaction *restrict act,
+	           struct sigaction *restrict oact);
+\end{lstlisting}
+
+Sending in a \texttt{struct sigaction*} with its \texttt{sa\_handler} field set
+to our signal handler function \texttt{gamepad\_handler}. The gamepad handler
+reads the status of the controller from the opened gamepad device and invokes
+the input function for the currently active scene. The \texttt{fcntl} function
+is then invoked on the gamepad's file descriptor to set the owning process ID of
+the descriptor to the current process' ID and enables the \texttt{FASYNC} flag
+of the file. The game now has asynchronous I/O from the gamepad driver.
+
+\subsection{Intro}
+
+The intro scene is, obviously, the first scene the game enters. When the intro
+is initialised it draws a background image over the entire display with a call
+to \texttt{draw\_image}. \texttt{draw\_image} draws an image to the framebuffer
+at a specified location on the display. This is implemented as a loop over each
+row of the image where each row is copied into the framebuffer with
+\texttt{memcpy}. After the loop is finished, \texttt{ioctl} is invoked to update
+the display. After the background has been drawn, two images with text are
+overlayed on the background in an animation. Every frame a line of the image is
+drawn into the framebuffer and displayed. If the microcontroller were left to
+run the code as fast as it could, it would not be much of an animation.
+Therefore, a delay is introduced between every frame, by invoking the
+\texttt{usleep} function. This function puts the calling thread to sleep for a
+specified amount of microseconds, or until the program receives a signal.
+Sleeping the game thread instead of waiting in a loop gives the Linux system the
+opportunity to put the CPU into low energy modes, saving energy. Once the
+animation has finished, the intro scene enters an idle state where the thread is
+put to sleep for 1 second at a time.
+
+\subsection{Game}
+
+After the intro scene the game enters the game scene. There is no continuous
+animation during this scene. At entry to the scene, a sidebar image is drawn on
+the left with \texttt{draw\_image}, a \(6 \times 6\) grid of tiles is drawn on
+the right and a selection cursor is drawn on the upper left tile. The tiles are
+drawn with \texttt{refresh\_tile}, which ultimately invokes
+\texttt{draw\_image}, sending in an image of the dog tile if tile is open
+according to the game state or an image of of a dog paw impression on wood if
+the tile is closed. The cursor is drawn by \texttt{draw\_cursor}, which draws
+lines of a solid colour along the edges of the tile by directly setting values
+in a loop. As the cursor is moved around the board, the tile of the cursor's
+previous location is redrawn with \texttt{refresh\_tile} to remove the cursor
+from the old tile and the cursor is drawn over the new location's tile, again
+with \texttt{draw\_cursor}.
+
+\subsection{Ending}
+
+After the game scene comes an ending scene. The ending scene is the most
+graphically intense scene. As with the intro scene, the ending scene has a
+background drawn over the entire scene and an animation is played over it.
+\texttt{usleep} is again used to sleep in between each frame. The animation
+played played during the ending scene is a balloon image with transparent pixels
+floating over the background. The balloon is drawn with a function
+\texttt{blit}, which draws and image to the framebuffer, but leaves the
+framebuffer alone if the pixel in the image has a certain value. At every new
+frame, the damage from the old balloon is repaired before drawing the balloon in
+its new position over the background again. In the initial version of this
+scene, the damaged area of the background was repaired by redrawing the
+background over the entire rectangle of the old balloon. While this worked, it
+caused noticable flickering on the balloon as the background got drawn over the
+location of the new balloon. Through some more work we ended up with the
+\texttt{blit\_repair\_background} which, based on the old balloon position and
+the new balloon position, only repairs the background where the old balloon has
+left it damaged and the new balloon does not cover. Using this function, the
+animation shows no flickering.
+
+\section{Tickless Idle}
+
+As the Linux system controls most of the hardware for us, we didn't find much we
+could try to do in our code to lower power consumption, apart from sleeping in
+the game, limit draws to the display to what is necessary, and not constantly
+poll the gamepad driver for updates. We tried one energy consumption measure,
+which is to enable tickless idle in the Linux kernel. What this does is that
+instead of having the kernel interrupted by a timer at a set frequency, the
+kernel schedules the next time it wants to be interrupted. If the system has
+little to do, for instance if it is idle in our game scene waiting for input,
+the kernel could most likely schedule interrupts far less frequently than the
+fixed timer and thus keep the CPU in a lower energy mode for larger periods of
+time. To enable tickless idle we used \texttt{ptxdist kernelconfig} to enter the
+kernel configuration menu, enabled ticlkless idle and recompiled the kernel.
+
+\section{Testing}
+
+In earlier exercises we mostly employed the \texttt{gdb} tool for debugging our
+code. For the system used in this exercise, debugging with \texttt{gdb} is not
+available without some extra work, which we never found the need to put in. We
+managed to debug the code sufficiently with print statements and inspection of
+the display. For energy consumption measurements we employed the eAProfiler
+tool.
